@@ -1,0 +1,163 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+#add-website {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+input[type="text"], input[type="number"] {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.website-item {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.website-info {
+    flex-grow: 1;
+}
+
+.website-url a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.website-url a:hover {
+    text-decoration: underline;
+}
+
+.status-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.status-green {
+    background-color: #4CAF50;
+}
+
+.status-gray {
+    background-color: #9e9e9e;
+}
+
+.status-red {
+    background-color: #f44336;
+}
+
+.website-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.remove-button {
+    background-color: #f44336;
+}
+
+.remove-button:hover {
+    background-color: #d32f2f;
+}
+
+.interval-input {
+    width: 60px;
+}
+
+#legend {
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+#legend h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend-item .status-indicator {
+    margin-right: 10px;
+}
+
+.last-visited {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+    #add-website {
+        flex-direction: column;
+    }
+    #add-website input[type="text"],
+    #add-website input[type="number"] {
+        width: 100%;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+    #add-button {
+        width: 100%;
+    }
+    .website-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .website-actions {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .interval-input, .update-interval, .remove-button {
+        width: 100%;
+        margin-top: 5px;
+        box-sizing: border-box;
+    }
+}

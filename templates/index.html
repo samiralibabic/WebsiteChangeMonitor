@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Change Monitor</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Website Change Monitor</h1>
+        <div id="add-website">
+            <input type="text" id="website-url" placeholder="Enter website URL" tabindex="1">
+            <input type="number" id="check-interval" placeholder="Check interval (hours)" min="1" value="24" tabindex="2">
+            <button id="add-button" tabindex="3">Add Website</button>
+        </div>
+        <div id="website-list"></div>
+        <div id="legend">
+            <h3>Status Legend:</h3>
+            <div class="legend-item">
+                <div class="status-indicator status-green"></div>
+                <span>Changes were made since the last time you visited</span>
+            </div>
+            <div class="legend-item">
+                <div class="status-indicator status-gray"></div>
+                <span>No changes since your last visit, or you've already seen the changes</span>
+            </div>
+            <div class="legend-item">
+                <div class="status-indicator status-red"></div>
+                <span>The website is unreachable or check is overdue</span>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
