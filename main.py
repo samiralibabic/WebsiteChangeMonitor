@@ -119,8 +119,10 @@ def login():
                 app.logger.info(f"User {form.username.data} logged in successfully")
                 flash('You have been logged in successfully!', 'success')
                 next_page = request.args.get('next')
+                app.logger.debug(f"Next page: {next_page}")
                 if not next_page or urlparse(next_page).netloc != '':
                     next_page = url_for('index')
+                app.logger.debug(f"Redirecting to: {next_page}")
                 return redirect(next_page)
             except Exception as e:
                 app.logger.error(f"Error during login process: {str(e)}")
