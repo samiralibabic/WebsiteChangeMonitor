@@ -146,8 +146,10 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
+        app.logger.info(f"Form validated. Attempting to register user: {form.username.data}")
         existing_user = User.query.filter_by(username=form.username.data).first()
         if existing_user:
+            app.logger.warning(f"Username {form.username.data} already exists")
             flash('Username already exists. Please choose a different username.', 'error')
             return redirect(url_for('register'))
         user = User(username=form.username.data)
@@ -155,12 +157,18 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
+            app.logger.info(f"User {form.username.data} registered successfully")
             flash('Congratulations, you are now a registered user!', 'success')
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
             app.logger.error(f"Error registering user: {str(e)}")
             flash('An error occurred during registration. Please try again.', 'error')
+    else:
+        app.logger.warning(f"Form validation failed: {form.errors}")
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field.capitalize()}: {error}", 'error')
     return render_template('register.html', title='Register', form=form)
 
 @app.route('/api/websites', methods=['GET'])
