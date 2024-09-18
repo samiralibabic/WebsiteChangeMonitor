@@ -2,36 +2,19 @@
 
 {% block content %}
     <h1>Register</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    <form action="{{ url_for('register') }}" method="post">
+    <div class="error-messages"></div>
+    <form id="register-form" action="{{ url_for('register') }}" method="post">
         <p>
             {{ form.username.label }}<br>
             {{ form.username(size=32) }}
-            {% for error in form.username.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
         </p>
         <p>
             {{ form.password.label }}<br>
             {{ form.password(size=32) }}
-            {% for error in form.password.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
         </p>
         <p>
             {{ form.password2.label }}<br>
             {{ form.password2(size=32) }}
-            {% for error in form.password2.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
         </p>
         <p>{{ form.submit() }}</p>
     </form>

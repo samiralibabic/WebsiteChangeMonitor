@@ -1,0 +1,72 @@
+INFO:werkzeug: * Restarting with stat
+INFO:main:DATABASE_URL is set
+INFO:main:Database initialized successfully
+INFO:main:Tables created successfully
+INFO:main:Database schema updated successfully
+INFO:main:Starting Flask application on port 5000
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 639-476-983
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:28:52] "GET / HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+WARNING:main:Form validation failed: {}
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:28:52] "GET /login?next=/ HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:28:52] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:04] "GET / HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+WARNING:main:Form validation failed: {}
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:04] "GET /login?next=/ HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:04] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:main:Register route accessed. Method: GET, Data: ImmutableMultiDict([])
+WARNING:main:Form validation failed: {}
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:12] "GET /register HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:13] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:main:Register route accessed. Method: POST, Data: ImmutableMultiDict([('username', 'testuser'), ('password', 'testuser'), ('password2', 'testuser'), ('submit', 'Register')])
+INFO:main:Form validated. Attempting to register user: testuser
+WARNING:main:Username testuser already exists
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:22] "POST /register HTTP/1.1" 302 -
+INFO:main:Register route accessed. Method: GET, Data: ImmutableMultiDict([])
+WARNING:main:Form validation failed: {}
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:22] "GET /register HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:23] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:main:Register route accessed. Method: POST, Data: ImmutableMultiDict([('username', 'newuser1'), ('password', 'newuser1'), ('password2', 'newuser1'), ('submit', 'Register')])
+INFO:main:Form validated. Attempting to register user: newuser1
+INFO:main:User newuser1 registered successfully
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:33] "POST /register HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+WARNING:main:Form validation failed: {}
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:33] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:29:33] "GET /static/css/styles.css HTTP/1.1" 304 -
+DEBUG:main:Login route accessed. Method: POST
+DEBUG:main:Login form data: ImmutableMultiDict([('username', 'lasdfj'), ('password', 'lsdfa'), ('submit', 'Sign In')])
+DEBUG:main:Form errors: {}
+DEBUG:main:Form validated. Attempting login for username: lasdfj
+DEBUG:main:User query result: None
+WARNING:main:Invalid username or password for: lasdfj
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:30:03] "POST /login HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+WARNING:main:Form validation failed: {}
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:30:03] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:30:04] "GET /static/css/styles.css HTTP/1.1" 304 -
+DEBUG:main:Login route accessed. Method: POST
+DEBUG:main:Login form data: ImmutableMultiDict([('username', 'test'), ('password', 'test'), ('submit', 'Sign In')])
+DEBUG:main:Form errors: {}
+DEBUG:main:Form validated. Attempting login for username: test
+DEBUG:main:User query result: <User 7>
+INFO:main:User test logged in successfully
+DEBUG:main:Redirecting to: /
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:30:14] "POST /login HTTP/1.1" 302 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:30:14] "GET / HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+WARNING:main:Form validation failed: {}
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:30:14] "GET /login?next=/ HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.32 - - [18/Sep/2024 20:30:14] "GET /static/css/styles.css HTTP/1.1" 304 -

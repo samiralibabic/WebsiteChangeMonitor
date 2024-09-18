@@ -111,26 +111,18 @@ def login():
             app.logger.debug(f"User query result: {user}")
             if user is None or not user.check_password(form.password.data):
                 app.logger.warning(f"Invalid username or password for: {form.username.data}")
-                flash('Invalid username or password', 'error')
-                return redirect(url_for('login'))
+                return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
             
             login_user(user)
             app.logger.info(f"User {form.username.data} logged in successfully")
-            flash('You have been logged in successfully!', 'success')
-            next_page = request.args.get('next')
-            if not next_page or urlparse(next_page).netloc != '':
-                next_page = url_for('index')
-            app.logger.debug(f"Redirecting to: {next_page}")
-            return redirect(next_page)
+            return jsonify({'success': True, 'redirect': url_for('index')})
         except Exception as e:
             app.logger.error(f"Error during login process: {str(e)}")
-            flash('An error occurred during login. Please try again.', 'error')
-            return redirect(url_for('login'))
+            return jsonify({'success': False, 'message': 'An error occurred during login'}), 500
     else:
         app.logger.warning(f"Form validation failed: {form.errors}")
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f"{field.capitalize()}: {error}", 'error')
+        errors = {field: ', '.join(errors) for field, errors in form.errors.items()}
+        return jsonify({'success': False, 'errors': errors}), 400
     
     return render_template('login.html', title='Sign In', form=form)
 
@@ -151,24 +143,24 @@ def register():
         if existing_user:
             app.logger.warning(f"Username {form.username.data} already exists")
             flash('Username already exists. Please choose a different username.', 'error')
-            return redirect(url_for('register'))
+            return jsonify({'success': False, 'message': 'Username already exists'}), 400
         user = User(username=form.username.data)
         user.set_password(form.password.data)
         try:
             db.session.add(user)
             db.session.commit()
             app.logger.info(f"User {form.username.data} registered successfully")
+            login_user(user)
             flash('Congratulations, you are now a registered user!', 'success')
-            return redirect(url_for('login'))
+            return jsonify({'success': True, 'redirect': url_for('index')})
         except Exception as e:
             db.session.rollback()
             app.logger.error(f"Error registering user: {str(e)}")
-            flash('An error occurred during registration. Please try again.', 'error')
+            return jsonify({'success': False, 'message': 'An error occurred during registration'}), 500
     else:
         app.logger.warning(f"Form validation failed: {form.errors}")
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f"{field.capitalize()}: {error}", 'error')
+        errors = {field: ', '.join(errors) for field, errors in form.errors.items()}
+        return jsonify({'success': False, 'errors': errors}), 400
     return render_template('register.html', title='Register', form=form)
 
 @app.route('/api/websites', methods=['GET'])

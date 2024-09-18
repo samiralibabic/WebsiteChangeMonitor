@@ -1,4 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const registerForm = document.querySelector('#register-form');
+    const loginForm = document.querySelector('#login-form');
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleFormSubmit);
+    }
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleFormSubmit);
+    }
+
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const url = form.action;
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                displayErrors(data.errors || {'error': data.message});
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            displayErrors({'error': 'An unexpected error occurred'});
+        });
+    }
+
+    function displayErrors(errors) {
+        const errorContainer = document.querySelector('.error-messages');
+        errorContainer.innerHTML = '';
+        for (const [field, message] of Object.entries(errors)) {
+            const errorElement = document.createElement('p');
+            errorElement.textContent = `${field}: ${message}`;
+            errorContainer.appendChild(errorElement);
+        }
+    }
+
     const websiteList = document.getElementById('website-list');
     const addButton = document.getElementById('add-button');
     const websiteUrlInput = document.getElementById('website-url');
