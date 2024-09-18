@@ -104,25 +104,32 @@ def login():
     app.logger.debug(f"Login form data: {request.form}")
     app.logger.debug(f"Form errors: {form.errors}")
     
-    if form.validate_on_submit():
-        app.logger.debug(f"Form validated. Attempting login for username: {form.username.data}")
-        try:
-            user = User.query.filter_by(username=form.username.data).first()
-            app.logger.debug(f"User query result: {user}")
-            if user is None or not user.check_password(form.password.data):
-                app.logger.warning(f"Invalid username or password for: {form.username.data}")
-                return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
-            
-            login_user(user)
-            app.logger.info(f"User {form.username.data} logged in successfully")
-            return jsonify({'success': True, 'redirect': url_for('index')})
-        except Exception as e:
-            app.logger.error(f"Error during login process: {str(e)}")
-            return jsonify({'success': False, 'message': 'An error occurred during login'}), 500
-    else:
-        app.logger.warning(f"Form validation failed: {form.errors}")
-        errors = {field: ', '.join(errors) for field, errors in form.errors.items()}
-        return jsonify({'success': False, 'errors': errors}), 400
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            app.logger.debug(f"Form validated. Attempting login for username: {form.username.data}")
+            try:
+                user = User.query.filter_by(username=form.username.data).first()
+                app.logger.debug(f"User query result: {user}")
+                if user is None or not user.check_password(form.password.data):
+                    app.logger.warning(f"Invalid username or password for: {form.username.data}")
+                    flash('Invalid username or password', 'error')
+                    return render_template('login.html', title='Sign In', form=form)
+                
+                login_user(user)
+                app.logger.info(f"User {form.username.data} logged in successfully")
+                flash('You have been logged in successfully!', 'success')
+                next_page = request.args.get('next')
+                if not next_page or urlparse(next_page).netloc != '':
+                    next_page = url_for('index')
+                return redirect(next_page)
+            except Exception as e:
+                app.logger.error(f"Error during login process: {str(e)}")
+                flash('An error occurred during login. Please try again.', 'error')
+        else:
+            app.logger.warning(f"Form validation failed: {form.errors}")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"{field.capitalize()}: {error}", 'error')
     
     return render_template('login.html', title='Sign In', form=form)
 
