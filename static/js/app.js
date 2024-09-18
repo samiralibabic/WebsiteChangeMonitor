@@ -1,9 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const registerForm = document.querySelector('#register-form');
+    const registerForm = document.getElementById('register-form');
     const loginForm = document.querySelector('#login-form');
 
     if (registerForm) {
-        registerForm.addEventListener('submit', handleFormSubmit);
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(registerForm);
+            fetch('/register', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    const errorContainer = document.querySelector('.error-messages');
+                    errorContainer.innerHTML = '';
+                    for (const [field, errors] of Object.entries(data.errors)) {
+                        const errorElement = document.createElement('p');
+                        errorElement.textContent = `${field}: ${errors}`;
+                        errorContainer.appendChild(errorElement);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An unexpected error occurred. Please try again.');
+            });
+        });
     }
 
     if (loginForm) {
