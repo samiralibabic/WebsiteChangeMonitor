@@ -138,16 +138,26 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    app.logger.info(f"Register route accessed. Method: {request.method}, Data: {request.form}")
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
+        existing_user = User.query.filter_by(username=form.username.data).first()
+        if existing_user:
+            flash('Username already exists. Please choose a different username.', 'error')
+            return redirect(url_for('register'))
         user = User(username=form.username.data)
         user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Congratulations, you are now a registered user!')
-        return redirect(url_for('login'))
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Congratulations, you are now a registered user!', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error registering user: {str(e)}")
+            flash('An error occurred during registration. Please try again.', 'error')
     return render_template('register.html', title='Register', form=form)
 
 @app.route('/api/websites', methods=['GET'])
@@ -189,6 +199,18 @@ def visit_website(id):
     website.last_visited = datetime.utcnow()
     db.session.commit()
     return jsonify(website.to_dict())
+
+@app.route('/debug/clear_users', methods=['POST'])
+def clear_users():
+    try:
+        num_deleted = db.session.query(User).delete()
+        db.session.commit()
+        app.logger.info(f"Cleared {num_deleted} users from the database")
+        return jsonify({"message": f"Successfully cleared {num_deleted} users from the database"}), 200
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error clearing users: {str(e)}")
+        return jsonify({"error": "Failed to clear users from the database"}), 500
 
 if __name__ == '__main__':
     create_tables()
