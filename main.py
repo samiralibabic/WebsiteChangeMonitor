@@ -44,6 +44,8 @@ except Exception as e:
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.login_message = 'Please log in to access this page.'
+login_manager.login_message_category = 'info'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -87,7 +89,8 @@ class RegistrationForm(FlaskForm):
 @app.route('/')
 @login_required
 def index():
-    app.logger.debug(f"Index route accessed by user: {current_user.username}")
+    app.logger.debug(f"Index route accessed. User authenticated: {current_user.is_authenticated}")
+    app.logger.debug(f"Current user: {current_user}")
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -211,6 +214,17 @@ def clear_users():
         db.session.rollback()
         app.logger.error(f"Error clearing users: {str(e)}")
         return jsonify({"error": "Failed to clear users from the database"}), 500
+
+@app.route('/debug/auth_status')
+def debug_auth_status():
+    if current_user.is_authenticated:
+        return jsonify({
+            "is_authenticated": True,
+            "user_id": current_user.id,
+            "username": current_user.username
+        }), 200
+    else:
+        return jsonify({"is_authenticated": False}), 200
 
 if __name__ == '__main__':
     create_tables()
