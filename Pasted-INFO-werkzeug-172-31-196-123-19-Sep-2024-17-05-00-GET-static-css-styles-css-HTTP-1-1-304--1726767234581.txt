@@ -1,0 +1,39 @@
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:05:00] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:main:Register route accessed. Method: POST, Data: ImmutableMultiDict([('username', 'new_user'), ('password', 'test'), ('password2', 'test'), ('submit', 'Register')])
+INFO:main:Form validated. Attempting to register user: new_user
+INFO:main:User new_user registered successfully
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:05:18] "POST /register HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:05:18] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:05:18] "GET /static/css/styles.css HTTP/1.1" 304 -
+
+Then when logging in:
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:05:48] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:05:48] "GET /static/css/styles.css HTTP/1.1" 304 -
+DEBUG:main:Login route accessed. Method: POST
+DEBUG:main:Login form data: ImmutableMultiDict([('username', 'new_user'), ('password', 'test'), ('submit', 'Sign In')])
+DEBUG:main:Form errors: {}
+DEBUG:main:Form validated. Attempting login for username: new_user
+DEBUG:main:User query result: <User 11>
+INFO:main:User new_user logged in successfully
+DEBUG:main:Redirecting to: /
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:06:03] "POST /login HTTP/1.1" 302 -
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:06:03] "GET / HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:06:03] "GET /login?next=/ HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:06:04] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:06:09] "GET / HTTP/1.1" 302 -
+DEBUG:main:Login route accessed. Method: GET
+DEBUG:main:Login form data: ImmutableMultiDict([])
+DEBUG:main:Form errors: {}
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:06:09] "GET /login?next=/ HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.123 - - [19/Sep/2024 17:06:09] "GET /static/css/styles.css HTTP/1.1" 304 -
+
+Looks fine in the logs, I guess. Just does not show proper content, but refreshes the page instead.
