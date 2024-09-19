@@ -2,8 +2,8 @@
 
 {% block content %}
     <h1>Register</h1>
-    <div class="error-messages"></div>
-    <form id="register-form" action="{{ url_for('register') }}" method="post">
+    <form action="{{ url_for('register') }}" method="post">
+        {{ form.hidden_tag() }}
         <p>
             {{ form.username.label }}<br>
             {{ form.username(size=32) }}

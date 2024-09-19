@@ -104,34 +104,28 @@ def login():
     app.logger.debug(f"Login form data: {request.form}")
     app.logger.debug(f"Form errors: {form.errors}")
     
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            app.logger.debug(f"Form validated. Attempting login for username: {form.username.data}")
-            try:
-                user = User.query.filter_by(username=form.username.data).first()
-                app.logger.debug(f"User query result: {user}")
-                if user is None or not user.check_password(form.password.data):
-                    app.logger.warning(f"Invalid username or password for: {form.username.data}")
-                    flash('Invalid username or password', 'error')
-                    return render_template('login.html', title='Sign In', form=form)
-                
-                login_user(user)
-                app.logger.info(f"User {form.username.data} logged in successfully")
-                flash('You have been logged in successfully!', 'success')
-                next_page = request.args.get('next')
-                app.logger.debug(f"Next page: {next_page}")
-                if not next_page or urlparse(next_page).netloc != '':
-                    next_page = url_for('index')
-                app.logger.debug(f"Redirecting to: {next_page}")
-                return redirect(next_page)
-            except Exception as e:
-                app.logger.error(f"Error during login process: {str(e)}")
-                flash('An error occurred during login. Please try again.', 'error')
-        else:
-            app.logger.warning(f"Form validation failed: {form.errors}")
-            for field, errors in form.errors.items():
-                for error in errors:
-                    flash(f"{field.capitalize()}: {error}", 'error')
+    if form.validate_on_submit():
+        app.logger.debug(f"Form validated. Attempting login for username: {form.username.data}")
+        try:
+            user = User.query.filter_by(username=form.username.data).first()
+            app.logger.debug(f"User query result: {user}")
+            if user is None or not user.check_password(form.password.data):
+                app.logger.warning(f"Invalid username or password for: {form.username.data}")
+                flash('Invalid username or password', 'error')
+                return render_template('login.html', title='Sign In', form=form)
+            
+            login_user(user)
+            app.logger.info(f"User {form.username.data} logged in successfully")
+            flash('You have been logged in successfully!', 'success')
+            next_page = request.args.get('next')
+            if not next_page or urlparse(next_page).netloc != '':
+                next_page = url_for('index')
+            app.logger.debug(f"Redirecting to: {next_page}")
+            return redirect(next_page)
+        except Exception as e:
+            app.logger.error(f"Error during login process: {str(e)}")
+            flash('An error occurred during login. Please try again.', 'error')
+            return render_template('login.html', title='Sign In', form=form)
     
     return render_template('login.html', title='Sign In', form=form)
 
@@ -146,29 +140,30 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
-    if request.method == 'POST':
-        app.logger.debug(f"POST request received. Form data: {request.form}")
-        if form.validate_on_submit():
-            app.logger.info(f"Form validated. Attempting to register user: {form.username.data}")
-            existing_user = User.query.filter_by(username=form.username.data).first()
-            if existing_user:
-                app.logger.warning(f"Username {form.username.data} already exists")
-                return jsonify({'success': False, 'errors': {'username': 'Username already exists'}}), 400
-            try:
-                user = User(username=form.username.data)
-                user.set_password(form.password.data)
-                db.session.add(user)
-                db.session.commit()
-                app.logger.info(f"User {form.username.data} registered successfully")
-                login_user(user)
-                return jsonify({'success': True, 'redirect': url_for('index')})
-            except Exception as e:
-                db.session.rollback()
-                app.logger.error(f"Error registering user: {str(e)}")
-                return jsonify({'success': False, 'errors': {'database': str(e)}}), 500
-        else:
-            app.logger.warning(f"Form validation failed: {form.errors}")
-            return jsonify({'success': False, 'errors': form.errors}), 400
+    if form.validate_on_submit():
+        app.logger.info(f"Form validated. Attempting to register user: {form.username.data}")
+        existing_user = User.query.filter_by(username=form.username.data).first()
+        if existing_user:
+            app.logger.warning(f"Username {form.username.data} already exists")
+            flash('Username already exists. Please choose a different username.', 'error')
+            return render_template('register.html', title='Register', form=form)
+        try:
+            user = User(username=form.username.data)
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+            app.logger.info(f"User {form.username.data} registered successfully")
+            flash('Congratulations, you are now a registered user!', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error registering user: {str(e)}")
+            flash('An error occurred during registration. Please try again.', 'error')
+    else:
+        app.logger.warning(f"Form validation failed: {form.errors}")
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field.capitalize()}: {error}", 'error')
     return render_template('register.html', title='Register', form=form)
 
 @app.route('/api/websites', methods=['GET'])
