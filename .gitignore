@@ -15,3 +15,4 @@ venv
 replit.nix
 poetry.lock
 .replit
+instance

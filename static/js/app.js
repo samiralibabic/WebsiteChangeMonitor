@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const websiteItem = createWebsiteItem(newWebsite);
                 websiteList.insertBefore(websiteItem, websiteList.firstChild);
                 websiteUrlInput.value = '';
-                checkIntervalInput.value = '60';
+                checkIntervalInput.value = '24';
             })
             .catch(error => {
                 console.error('Error adding website:', error);

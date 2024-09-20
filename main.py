@@ -252,7 +252,7 @@ def visit_website(id):
 
 def init_scheduler(app):
     scheduler = BackgroundScheduler()
-    scheduler.add_job(id='check_websites', func=check_website_changes, trigger='interval', minutes=1, args=[app])
+    scheduler.add_job(id='check_websites', func=check_website_changes, trigger='interval', minutes=5, args=[app])
     scheduler.start()
     return scheduler
 
