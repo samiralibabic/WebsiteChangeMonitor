@@ -13,6 +13,5 @@ venv
 .yarn
 .yarnrc.yml
 replit.nix
-poetry.lock
 .replit
 instance

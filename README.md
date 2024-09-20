@@ -50,7 +50,7 @@ Website Change Monitor is a web application that allows users to track changes o
    Create a `.env` file in the project root and add the following:
    ```
    SECRET_KEY=your_secret_key
-   DATABASE_URL=postgresql://username:password@localhost/dbname
+   DATABASE_URL=sqlite:///your_database.db
    ```
 
 6. Initialize the database:
