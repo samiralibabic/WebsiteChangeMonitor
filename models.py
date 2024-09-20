@@ -23,9 +23,9 @@ class Website(db.Model):
     last_check = db.Column(db.DateTime, default=datetime.utcnow)
     last_change = db.Column(db.DateTime, nullable=True)
     last_content = db.Column(db.Text, nullable=True)
-    check_interval = db.Column(db.Integer, default=24)  # in hours
+    check_interval = db.Column(db.Integer, default=60) # in minutes
     last_visited = db.Column(db.DateTime, nullable=True)
-    is_reachable = db.Column(db.Boolean, default=True)
+    is_reachable = db.Column(db.Boolean, default=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -35,6 +35,7 @@ class Website(db.Model):
             'url': self.url,
             'last_check': self.last_check.isoformat() if self.last_check else None,
             'last_change': self.last_change.isoformat() if self.last_change else None,
+            'last_content': self.last_content,
             'last_visited': self.last_visited.isoformat() if self.last_visited else None,
             'check_interval': self.check_interval,
             'is_reachable': self.is_reachable,

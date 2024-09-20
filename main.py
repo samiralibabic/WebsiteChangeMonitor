@@ -10,6 +10,11 @@ from datetime import datetime
 from sqlalchemy import text
 from urllib.parse import urlparse
 from dotenv import load_dotenv
+from urllib.request import urlopen
+from urllib.error import URLError
+from datetime import datetime
+from scheduler import init_scheduler
+from tasks import check_website_changes
 
 load_dotenv()
 
@@ -190,7 +195,29 @@ def get_websites():
 @login_required
 def add_website():
     data = request.json
-    new_website = Website(url=data['url'], check_interval=data['interval'], user_id=current_user.id)
+    url = data['url']
+    current_time = datetime.utcnow()
+
+    try:
+        response = urlopen(url)
+        is_reachable = True
+        content = response.read().decode('utf-8')
+        last_check = datetime.utcnow()
+    except URLError:
+        is_reachable = False
+        content = None
+        last_check = None
+    
+    new_website = Website(
+        url=url, 
+        check_interval=data['interval'], 
+        user_id=current_user.id,
+        is_reachable=is_reachable,
+        last_check=last_check,
+        last_content=content,
+        last_visited=current_time,
+        date_added=current_time
+    )
     db.session.add(new_website)
     db.session.commit()
     return jsonify(new_website.to_dict()), 201
@@ -220,31 +247,10 @@ def visit_website(id):
     db.session.commit()
     return jsonify(website.to_dict())
 
-@app.route('/debug/clear_users', methods=['POST'])
-def clear_users():
-    try:
-        num_deleted = db.session.query(User).delete()
-        db.session.commit()
-        app.logger.info(f"Cleared {num_deleted} users from the database")
-        return jsonify({"message": f"Successfully cleared {num_deleted} users from the database"}), 200
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(f"Error clearing users: {str(e)}")
-        return jsonify({"error": "Failed to clear users from the database"}), 500
-
-@app.route('/debug/auth_status')
-def debug_auth_status():
-    if current_user.is_authenticated:
-        return jsonify({
-            "is_authenticated": True,
-            "user_id": current_user.id,
-            "username": current_user.username
-        }), 200
-    else:
-        return jsonify({"is_authenticated": False}), 200
-
 if __name__ == '__main__':
     create_tables()
     update_schema()
+    scheduler = init_scheduler(app)
+    scheduler.add_job(id='check_websites', func=check_website_changes, trigger='interval', minutes=5)
     app.logger.info("Starting Flask application on port 5001")
     app.run(host='0.0.0.0', port=5001, debug=True)
