@@ -60,14 +60,14 @@ Website Change Monitor is a web application that allows users to track changes o
 
 7. Run the application:
    ```
-   python app.py
+   python main.py
    ```
 
 ## Project Structure
 
-- `app.py`: Main application file
+- `main.py`: Main application file
 - `models.py`: Database models
-- `forms.py`: Form definitions
+- `tasks.py`: Tasks for periodic checks
 - `templates/`: HTML templates
 - `static/`: Static assets
   - `css/`: Stylesheets

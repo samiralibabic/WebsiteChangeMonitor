@@ -14,8 +14,7 @@ from urllib.request import urlopen
 from urllib.error import URLError
 from datetime import datetime
 from scheduler import init_scheduler
-from tasks import check_website_changes
-
+from apscheduler.schedulers.background import BackgroundScheduler
 load_dotenv()
 
 app = Flask(__name__)
@@ -108,12 +107,14 @@ class RegistrationForm(FlaskForm):
 @app.route('/')
 @login_required
 def index():
+    session.pop('_flashes', None)
     app.logger.debug(f"Index route accessed. User authenticated: {current_user.is_authenticated}")
     app.logger.debug(f"Current user: {current_user}")
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    session.pop('_flashes', None)
     app.logger.debug(f"Login route accessed. Method: {request.method}")
     if current_user.is_authenticated:
         app.logger.debug("User already authenticated, redirecting to index")
@@ -150,7 +151,9 @@ def login():
 
 @app.route('/logout')
 def logout():
+    session.pop('_flashes', None)
     logout_user()
+    flash('You have been logged out successfully!', 'success')
     return redirect(url_for('index'))
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -247,10 +250,16 @@ def visit_website(id):
     db.session.commit()
     return jsonify(website.to_dict())
 
+def init_scheduler(app):
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(id='check_websites', func=check_website_changes, trigger='interval', minutes=1, args=[app])
+    scheduler.start()
+    return scheduler
+
+from tasks import check_website_changes
 if __name__ == '__main__':
     create_tables()
     update_schema()
     scheduler = init_scheduler(app)
-    scheduler.add_job(id='check_websites', func=check_website_changes, trigger='interval', minutes=5)
     app.logger.info("Starting Flask application on port 5001")
     app.run(host='0.0.0.0', port=5001, debug=True)

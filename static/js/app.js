@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(websites => {
                 console.log('Fetched websites:', websites);
                 websiteList.innerHTML = ''; // Clear the existing list
-                
+
                 // Sort websites by date_added in descending order
                 websites.sort((a, b) => new Date(b.date_added) - new Date(a.date_added));
-                
+
                 websites.forEach(website => {
                     const websiteItem = createWebsiteItem(website);
                     websiteList.appendChild(websiteItem);
@@ -31,17 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
         item.className = 'website-item';
         item.dataset.id = website.id;
         item.innerHTML = `
-            <div class="status-indicator ${getStatusClass(website)}"></div>
-            <div class="website-info">
-                <a href="${website.url}" target="_blank" rel="noopener noreferrer" class="website-link">${website.url}</a>
-                <div class="last-visited">Last visited: ${website.last_visited ? new Date(website.last_visited + 'Z').toLocaleString() : 'Never'}</div>
-            </div>
-            <div class="website-actions">
-                <input type="number" class="interval-input" value="${website.check_interval}" min="1">
-                <button class="update-interval" disabled>Update Interval</button>
-                <button class="remove-button">Remove</button>
-            </div>
-        `;
+        <div class="status-indicator ${getStatusClass(website)}"></div>
+        <div class="website-info">
+            <a href="${website.url}" target="_blank" rel="noopener noreferrer" class="website-link">${website.url}</a>
+            <div class="last-visited">Last visited: ${website.last_visited ? new Date(website.last_visited + 'Z').toLocaleString() : 'Never'}</div>
+            <div class="last-changed">Last change detected: ${website.last_change ? new Date(website.last_change + 'Z').toLocaleString() : 'Unknown'}</div>
+        </div>
+        <div class="website-actions">
+            <input type="number" class="interval-input" value="${website.check_interval}" min="1">
+            <button class="update-interval" disabled>Update Interval</button>
+            <button class="remove-button">Remove</button>
+        </div>
+    `;
 
         const removeButton = item.querySelector('.remove-button');
         removeButton.addEventListener('click', () => removeWebsite(website.id));
@@ -77,17 +78,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('Updated website:', updatedWebsite);
                     const statusIndicator = item.querySelector('.status-indicator');
                     statusIndicator.className = `status-indicator ${getStatusClass(updatedWebsite)}`;
-                    
+
                     // Update the last visited time
                     const lastVisitedElement = item.querySelector('.last-visited');
                     lastVisitedElement.textContent = `Last visited: ${new Date(updatedWebsite.last_visited + 'Z').toLocaleString()}`;
-                    
+
                     // Try to open the link in a new tab
                     const newWindow = window.open(website.url, '_blank');
                     if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
                         console.error('Pop-up blocked or failed to open new window.');
                         alert('The link could not be opened due to pop-up blocker settings. Please allow pop-ups for this site or use the following URL: ' + website.url);
-                        
+
                         // Create a temporary input element to copy the URL
                         const tempInput = document.createElement('input');
                         tempInput.value = website.url;
@@ -95,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         tempInput.select();
                         document.execCommand('copy');
                         document.body.removeChild(tempInput);
-                        
+
                         alert('The URL has been copied to your clipboard.');
                     } else {
                         console.log('New window opened successfully');
@@ -119,23 +120,23 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({ url, interval: parseInt(interval) }),
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw err; });
-            }
-            return response.json();
-        })
-        .then(newWebsite => {
-            console.log('Website added successfully:', newWebsite);
-            const websiteItem = createWebsiteItem(newWebsite);
-            websiteList.insertBefore(websiteItem, websiteList.firstChild);
-            websiteUrlInput.value = '';
-            checkIntervalInput.value = '24';
-        })
-        .catch(error => {
-            console.error('Error adding website:', error);
-            alert(`Failed to add website: ${error.error || 'Unknown error'}`);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(newWebsite => {
+                console.log('Website added successfully:', newWebsite);
+                const websiteItem = createWebsiteItem(newWebsite);
+                websiteList.insertBefore(websiteItem, websiteList.firstChild);
+                websiteUrlInput.value = '';
+                checkIntervalInput.value = '60';
+            })
+            .catch(error => {
+                console.error('Error adding website:', error);
+                alert(`Failed to add website: ${error.error || 'Unknown error'}`);
+            });
     }
 
     function removeWebsite(id) {
@@ -156,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         intervalInput.disabled = true;
         updateButton.disabled = true;
-        
+
         fetch(`/api/websites/${id}/interval`, {
             method: 'PATCH',
             headers: {
@@ -191,15 +192,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Website is not reachable');
             return 'status-red';
         }
-        
+
         const lastVisited = website.last_visited ? new Date(website.last_visited + 'Z') : null;
         const lastChange = website.last_change ? new Date(website.last_change + 'Z') : null;
-        
+
         if (lastChange && lastVisited && lastChange > lastVisited) {
             console.log('Content changed since last visit');
             return 'status-green';
         }
-        
+
         console.log('No changes or no visit yet');
         return 'status-gray';
     }
