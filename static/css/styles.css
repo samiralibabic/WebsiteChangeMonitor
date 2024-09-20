@@ -6,11 +6,91 @@ body {
     background-color: #f4f4f4;
 }
 
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav {
+    display: flex;
+    gap: 1rem;
+}
+
+nav a {
+    text-decoration: none;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
 .container {
-    width: 80%;
-    margin: auto;
-    overflow: hidden;
-    padding: 20px;
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.form-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-footer {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.mt-3 {
+    margin-top: 15px;
 }
 
 h1 {
@@ -24,19 +104,31 @@ h1 {
     gap: 10px;
 }
 
-input[type="text"], input[type="number"] {
-    flex-grow: 1;
-    padding: 10px;
+input[type="text"], input[type="password"], input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
     font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus {
+    border-color: #4CAF50;
+    outline: none;
 }
 
 button {
     background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 20px;
     cursor: pointer;
     font-size: 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -46,11 +138,17 @@ button:hover {
 .website-item {
     background-color: white;
     border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+}
+
+.website-item:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .website-info {
@@ -67,22 +165,26 @@ button:hover {
 }
 
 .status-indicator {
-    width: 20px;
-    height: 20px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     margin-right: 10px;
+    display: inline-block;
 }
 
 .status-green {
     background-color: #4CAF50;
+    box-shadow: 0 0 5px #4CAF50;
 }
 
 .status-gray {
     background-color: #9e9e9e;
+    box-shadow: 0 0 5px #9e9e9e;
 }
 
 .status-red {
     background-color: #f44336;
+    box-shadow: 0 0 5px #f44336;
 }
 
 .website-actions {
@@ -103,25 +205,27 @@ button:hover {
 }
 
 #legend {
-    margin-top: 20px;
+    margin-top: 30px;
     background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 5px;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
 }
 
 #legend h3 {
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    color: #333;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 .legend-item .status-indicator {
-    margin-right: 10px;
+    margin-right: 15px;
 }
 
 .last-visited {
@@ -156,19 +260,16 @@ button:hover {
 @media (max-width: 768px) {
     .container {
         width: 95%;
-        padding: 10px;
+        padding: 15px;
     }
     #add-website {
         flex-direction: column;
     }
     #add-website input[type="text"],
-    #add-website input[type="number"] {
-        width: 100%;
-        margin-bottom: 10px;
-        box-sizing: border-box;
-    }
+    #add-website input[type="number"],
     #add-button {
         width: 100%;
+        margin-bottom: 10px;
     }
     .website-item {
         flex-direction: column;
@@ -176,11 +277,26 @@ button:hover {
     }
     .website-actions {
         width: 100%;
-        margin-top: 10px;
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
     }
     .interval-input, .update-interval, .remove-button {
-        width: 100%;
-        margin-top: 5px;
-        box-sizing: border-box;
+        flex: 1;
+        min-width: 120px;
     }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.website-item {
+    animation: fadeIn 0.3s ease;
+}
+
+.alert {
+    animation: fadeIn 0.3s ease;
 }

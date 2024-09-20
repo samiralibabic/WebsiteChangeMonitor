@@ -9,6 +9,9 @@ from wtforms.validators import DataRequired, EqualTo
 from datetime import datetime
 from sqlalchemy import text
 from urllib.parse import urlparse
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret-key')
@@ -63,9 +66,20 @@ def create_tables():
 def update_schema():
     with app.app_context():
         try:
-            db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password_hash TYPE VARCHAR(255)'))
-            db.session.commit()
-            app.logger.info("Database schema updated successfully")
+            # Check if the column already exists with the correct type
+            result = db.session.execute(text("PRAGMA table_info(user)")).fetchall()
+            password_hash_column = next((col for col in result if col[1] == 'password_hash'), None)
+            
+            if password_hash_column is None or password_hash_column[2] != 'VARCHAR(255)':
+                # If the column doesn't exist or has the wrong type, recreate the table
+                db.session.execute(text('CREATE TABLE IF NOT EXISTS user_new (id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(64) UNIQUE, password_hash VARCHAR(255))'))
+                db.session.execute(text('INSERT OR IGNORE INTO user_new SELECT * FROM user'))
+                db.session.execute(text('DROP TABLE IF EXISTS user'))
+                db.session.execute(text('ALTER TABLE user_new RENAME TO user'))
+                db.session.commit()
+                app.logger.info("Database schema updated successfully")
+            else:
+                app.logger.info("Database schema is up to date")
         except Exception as e:
             db.session.rollback()
             app.logger.error(f"Error updating database schema: {str(e)}")
@@ -232,5 +246,5 @@ def debug_auth_status():
 if __name__ == '__main__':
     create_tables()
     update_schema()
-    app.logger.info("Starting Flask application on port 5000")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.logger.info("Starting Flask application on port 5001")
+    app.run(host='0.0.0.0', port=5001, debug=True)

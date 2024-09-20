@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+.cache
+.DS_Store
+.local
+venv
+.upm
+.pythonlibs
+.venv
+.env
+.node_modules
+.npm
+.yarn
+.yarnrc.yml
+replit.nix
+poetry.lock
+.replit
