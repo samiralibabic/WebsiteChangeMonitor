@@ -14,4 +14,4 @@ venv
 .yarnrc.yml
 replit.nix
 .replit
-instance
+/instance/
