@@ -1,6 +1,7 @@
 import os
 import logging
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from flask_cors import CORS
 from models import db, User, Website
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
@@ -13,26 +14,23 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 from urllib.request import urlopen
 from urllib.error import URLError
-from datetime import datetime
 from scheduler import init_scheduler
 from apscheduler.schedulers.background import BackgroundScheduler
+from tasks import check_website_changes
+
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret-key')
+CORS(app)
+
+# Hard-coded SQLite database URI
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "site.db")}'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 app.logger.setLevel(logging.DEBUG)
-
-# Database configuration
-database_url = os.environ.get('DATABASE_URL')
-if database_url:
-    app.logger.info("DATABASE_URL is set")
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url + '?sslmode=require'
-else:
-    app.logger.error("ERROR: DATABASE_URL is not set")
-    exit(1)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -52,8 +50,7 @@ except Exception as e:
     exit(1)
 
 # Initialize Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
@@ -254,13 +251,6 @@ def visit_website(id):
     db.session.commit()
     return jsonify(website.to_dict())
 
-def init_scheduler(app):
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(id='check_websites', func=check_website_changes, trigger='interval', minutes=5, args=[app])
-    scheduler.start()
-    return scheduler
-
-from tasks import check_website_changes
 if __name__ == '__main__':
     create_tables()
     update_schema()
