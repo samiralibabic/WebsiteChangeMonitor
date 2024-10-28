@@ -4,7 +4,7 @@ SECRET_KEY="$1"
 DATABASE_URL="$2"
 STRIPE_SECRET_KEY="$3"
 
-cd /path/to/website-monitor || exit
+cd /home/website-monitor || exit
 
 git pull origin main || { echo "Git pull failed"; exit 1; }
 
