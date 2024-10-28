@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 5002
 
-CMD ["sh", "-c", "flask db upgrade && gunicorn --bind 0.0.0.0:5001 main:app"]
+CMD ["sh", "-c", "flask db upgrade && gunicorn --bind 0.0.0.0:5002 main:app"]
