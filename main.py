@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from models import db, User, Website
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
+from flask_migrate import Migrate
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo
 from datetime import datetime
@@ -35,8 +36,11 @@ else:
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Initialize SQLAlchemy and Flask-Migrate
+db.init_app(app)
+migrate = Migrate(app, db)
+
 try:
-    db.init_app(app)
     # Test the connection
     with app.app_context():
         db.engine.connect()
