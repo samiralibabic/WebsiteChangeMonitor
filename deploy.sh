@@ -12,9 +12,10 @@ docker-compose build || { echo "Build failed"; exit 1; }
 
 docker-compose down
 
-docker-compose up -d \
-  -e SECRET_KEY="$SECRET_KEY" \
-  -e DATABASE_URL="$DATABASE_URL" \
-  -e STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" || { echo "Failed to start website-monitor"; exit 1; }
+export SECRET_KEY="$SECRET_KEY"
+export DATABASE_URL="$DATABASE_URL"
+export STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY"
+
+docker-compose up -d || { echo "Failed to start website-monitor"; exit 1; }
 
 echo "Deployment complete for website-monitor"
