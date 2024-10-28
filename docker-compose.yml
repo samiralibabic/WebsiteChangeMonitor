@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  website-monitor:
+    build: .
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+      - STRIPE_SECRET_KEY
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./instance:/app/instance
+    networks:
+      - caddy_net
+    restart: unless-stopped
+
+networks:
+  caddy_net:
+    external: true
