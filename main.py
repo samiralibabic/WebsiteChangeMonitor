@@ -441,9 +441,14 @@ def remove_all_websites():
             'message': str(e)
         }), 500
 
-if __name__ == '__main__':
+# Initialize tables and schema
+with app.app_context():
     create_tables()
     update_schema()
-    scheduler = init_scheduler(app)
+    
+# Initialize scheduler
+scheduler = init_scheduler(app)
+
+if __name__ == '__main__':
     app.logger.info("Starting Flask application on port 5001")
     app.run(host='0.0.0.0', port=5001, debug=True)

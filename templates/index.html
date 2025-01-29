@@ -120,24 +120,23 @@
                            class="link-url" 
                            rel="noopener noreferrer">{{ website.url }}</a>
                         <div class="link-metadata">
-                            {% if website.last_check %}
-                                <span class="metadata-item check-time">
-                                    <i class="fas fa-clock"></i>
-                                    Checked: <span class="datetime" data-utc="{{ website.last_check.isoformat() }}Z"></span>
+                            <span class="metadata-item check-time">
+                                <i class="fas fa-clock"></i>
+                                Checked: <span class="datetime" data-utc="{{ website.last_check.isoformat() if website.last_check else '' }}">
+                                    {% if website.last_check %}{{ website.last_check|format_datetime }}{% else %}Never{% endif %}
                                 </span>
-                            {% endif %}
+                            </span>
                             <span class="metadata-item visit-time">
                                 <i class="fas fa-eye"></i>
-                                Visited: 
-                                {% if website.last_visited %}
-                                    <span class="datetime" data-utc="{{ website.last_visited.isoformat() }}Z"></span>
-                                {% else %}
-                                    <span>Never</span>
-                                {% endif %}
+                                Visited: <span class="datetime" data-utc="{{ website.last_visited.isoformat() if website.last_visited else '' }}">
+                                    {% if website.last_visited %}{{ website.last_visited|format_datetime }}{% else %}Never{% endif %}
+                                </span>
                             </span>
                             <span class="metadata-item add-time">
                                 <i class="fas fa-plus"></i>
-                                Added: <span class="datetime" data-utc="{{ website.date_added.isoformat() }}Z"></span>
+                                Added: <span class="datetime" data-utc="{{ website.date_added.isoformat() }}Z">
+                                    {{ website.date_added|format_datetime }}
+                                </span>
                             </span>
                         </div>
                     </div>

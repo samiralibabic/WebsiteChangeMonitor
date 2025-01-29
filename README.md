@@ -10,6 +10,7 @@ Website Change Monitor is a web application that allows users to track changes o
 - Add websites to monitor
 - Set custom check intervals for each website
 - Visual status indicators for website changes and accessibility
+- Email notifications for unreachable websites
 - Responsive design for desktop and mobile use
 - Automatic periodic checks of monitored websites
 - Click-through to visit monitored websites
@@ -22,7 +23,9 @@ Website Change Monitor is a web application that allows users to track changes o
 - APScheduler (for periodic tasks)
 - BeautifulSoup4 (for parsing web content)
 - HTML/CSS/JavaScript (frontend)
-- PostgreSQL (database)
+- SQLite (database)
+- Gunicorn (WSGI server)
+- Docker (containerization)
 
 ## Installation
 
@@ -32,95 +35,92 @@ Website Change Monitor is a web application that allows users to track changes o
    cd website-change-monitor
    ```
 
-2. Create a virtual environment:
-   ```
-   python -m venv venv
-   ```
-
-3. Activate the virtual environment:
-   - On Windows: `venv\Scripts\activate`
-   - On macOS and Linux: `source venv/bin/activate`
-
-4. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-5. Set up environment variables:
-   Create a `.env` file in the project root and add the following:
+2. Create a `.env` file in the project root with the following variables:
    ```
    SECRET_KEY=your_secret_key
-   DATABASE_URL=sqlite:///your_database.db
+   DATABASE_URL=sqlite:///instance/site.db
+   
+   # Email configuration (optional)
+   MAIL_SERVER=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USE_TLS=True
+   MAIL_USERNAME=your_email@gmail.com
+   MAIL_PASSWORD=your_app_password
+   MAIL_DEFAULT_SENDER=your_email@gmail.com
    ```
 
-6. Initialize the database:
+3. Build and run with Docker:
    ```
-   flask db upgrade
+   docker-compose up --build
    ```
 
-7. Run the application:
-   ```
-   python main.py
-   ```
+The application will be available at `http://localhost:5002`
+
+## Docker Setup
+
+The application runs in a Docker container with the following configuration:
+
+- Python 3.11 slim image
+- Gunicorn as the WSGI server
+- SQLite database persisted in a volume
+- Automatic database migrations on startup
+
+### Docker Commands
+
+- Build and start: `docker-compose up --build`
+- Start existing container: `docker-compose up -d`
+- Stop container: `docker-compose down`
+- View logs: `docker-compose logs -f`
 
 ## Project Structure
 
 - `main.py`: Main application file
 - `models.py`: Database models
 - `tasks.py`: Tasks for periodic checks
+- `scheduler.py`: Background task scheduler
 - `templates/`: HTML templates
 - `static/`: Static assets
   - `css/`: Stylesheets
   - `js/`: JavaScript files
 - `migrations/`: Database migration files
+- `instance/`: SQLite database location
 
 ## Usage
 
 1. Register an account or log in
-2. On the main page, enter a website URL and check interval (in hours)
-3. Click "Add Website" to start monitoring
-4. The website will appear in the list with its current status
-5. Click on a website URL to visit it (this will also update its "last visited" time)
-6. Use the "Update Interval" button to change the check frequency
-7. Use the "Remove" button to stop monitoring a website
-
-## Status Legend
-
-- Green: Changes were made since the last time you visited
-- Gray: No changes since your last visit, or you've already seen the changes
-- Red: The website is unreachable or check is overdue
+2. Add websites to monitor with their check intervals
+3. The system will automatically check websites based on their intervals
+4. Green status indicates changes since your last visit
+5. Gray status means no changes or you've seen the latest changes
+6. Red status indicates the website is unreachable
+7. Configure email notifications in your user settings
 
 ## Development
 
-To contribute to the project:
+For local development without Docker:
 
-1. Fork the repository
-2. Create a new branch for your feature
-3. Make your changes and commit them
-4. Push to your fork and submit a pull request
+1. Create a virtual environment:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-Please ensure your code adheres to the project's style guidelines.
+2. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-## Deployment
+3. Set up environment variables (see Installation section)
 
-This application can be deployed to various platforms that support Python web applications. Make sure to set the necessary environment variables and configure the database connection string for your production environment.
+4. Initialize the database:
+   ```
+   flask db upgrade
+   ```
 
-## Dependencies
-
-Main dependencies include:
-
-- Flask 3.0.3
-- Flask-SQLAlchemy 3.1.1
-- APScheduler 3.10.4
-- Flask-APScheduler 1.13.1
-- BeautifulSoup4 4.12.3
-- Requests 2.32.3
-- Flask-Login 0.6.3
-- Flask-WTF 1.2.1
-- SQLAlchemy 2.0.35
-- Python-dotenv 1.0.0
-
-For a full list of dependencies, refer to the `requirements.txt` file.
+5. Run the development server:
+   ```
+   python main.py
+   ```
 
 ## License
 
