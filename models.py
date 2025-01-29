@@ -65,7 +65,6 @@ class Website(db.Model):
             'url': self.url,
             'last_check': self.last_check_utc.isoformat() + 'Z' if self.last_check_utc else None,
             'last_change': self.last_change_utc.isoformat() + 'Z' if self.last_change_utc else None,
-            'last_content': self.last_content,
             'last_visited': self.last_visited_utc.isoformat() + 'Z' if self.last_visited_utc else None,
             'check_interval': self.check_interval,
             'is_reachable': self.is_reachable,
