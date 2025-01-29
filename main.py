@@ -13,7 +13,7 @@ from sqlalchemy import text
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from urllib.request import Request, urlopen
-from urllib.error import URLError
+from urllib.error import URLError, HTTPError
 from scheduler import init_scheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from tasks import check_website_changes, schedule_periodic_checks
@@ -233,8 +233,14 @@ def check_website_reachability(url, timeout=5):
             'Upgrade-Insecure-Requests': '1'
         }
         req = Request(url, headers=headers)
-        response = urlopen(req, timeout=timeout)
-        return True, response
+        try:
+            response = urlopen(req, timeout=timeout)
+            return True, response
+        except HTTPError as he:
+            # 304 Not Modified is actually a success case
+            if he.code == 304:
+                return True, he
+            raise  # re-raise other HTTP errors
     except Exception as e:
         app.logger.error(f"Error checking {url}: {str(e)}")
         return False, None
