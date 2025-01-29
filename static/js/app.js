@@ -1,247 +1,549 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Remove the event listeners for form submissions
-    // The forms will now use the default HTML form submission
+// Initialize variables at the top level
+let websiteUrlInput;
+let checkIntervalInput;
+let addButton;
 
-    const websiteList = document.getElementById('website-list');
-    const addButton = document.getElementById('add-button');
-    const websiteUrlInput = document.getElementById('website-url');
-    const checkIntervalInput = document.getElementById('check-interval');
+// Utility functions
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return string.startsWith('http://') || string.startsWith('https://');
+    } catch (_) {
+        return false;
+    }
+}
 
-    function fetchWebsites() {
-        console.log('Fetching websites...');
-        fetch('/api/websites')
-            .then(response => response.json())
-            .then(websites => {
-                console.log('Fetched websites:', websites);
-                websiteList.innerHTML = ''; // Clear the existing list
-
-                // Sort websites by date_added in descending order
-                websites.sort((a, b) => new Date(b.date_added) - new Date(a.date_added));
-
-                websites.forEach(website => {
-                    const websiteItem = createWebsiteItem(website);
-                    websiteList.appendChild(websiteItem);
-                });
-            })
-            .catch(error => console.error('Error fetching websites:', error));
+function getStatusText(website) {
+    if (!website.is_reachable) {
+        return 'Website is currently unreachable';
     }
 
-    function createWebsiteItem(website) {
-        const item = document.createElement('div');
-        item.className = 'website-item';
-        item.dataset.id = website.id;
-        item.innerHTML = `
-        <div class="status-indicator ${getStatusClass(website)}"></div>
-        <div class="website-info">
-            <a href="${website.url}" target="_blank" rel="noopener noreferrer" class="website-link">${website.url}</a>
-            <div class="last-visited">Last visited: ${website.last_visited ? new Date(website.last_visited + 'Z').toLocaleString() : 'Never'}</div>
-            <div class="last-changed">Last change detected: ${website.last_change ? new Date(website.last_change + 'Z').toLocaleString() : 'Unknown'}</div>
-        </div>
-        <div class="website-actions">
-            <input type="number" class="interval-input" value="${website.check_interval}" min="1">
-            <button class="update-interval" disabled>Update Interval</button>
-            <button class="remove-button">Remove</button>
-        </div>
-    `;
+    const lastVisited = website.last_visited ? new Date(website.last_visited + 'Z') : null;
+    const lastChange = website.last_change ? new Date(website.last_change + 'Z') : null;
 
-        const removeButton = item.querySelector('.remove-button');
-        removeButton.addEventListener('click', () => removeWebsite(website.id));
+    if (lastChange && lastVisited && lastChange > lastVisited) {
+        return 'Changes detected since your last visit';
+    }
 
-        const updateIntervalButton = item.querySelector('.update-interval');
-        const intervalInput = item.querySelector('.interval-input');
-        let originalInterval = website.check_interval;
+    return 'No new changes';
+}
 
-        intervalInput.addEventListener('input', () => {
-            if (intervalInput.value !== originalInterval.toString()) {
-                updateIntervalButton.disabled = false;
-            } else {
-                updateIntervalButton.disabled = true;
-            }
-        });
+// Helper function to format dates in local time
+function formatLocalDateTime(utcDateString) {
+    if (!utcDateString) return 'Never';  // Handle null/undefined dates
+    
+    try {
+        // Remove the Z if the string already has a timezone offset
+        const cleanDateString = utcDateString.replace(/\+00:00Z$/, '+00:00');
+        
+        // Parse the date
+        const date = new Date(cleanDateString);
+        if (isNaN(date.getTime())) {  // Check if date is valid
+            console.error('Invalid date:', utcDateString);
+            return 'Invalid date';
+        }
+        
+        // Use the browser's locale and 24-hour format
+        return new Intl.DateTimeFormat(navigator.language, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        }).format(date);
+    } catch (error) {
+        console.error('Error formatting date:', error, utcDateString);
+        return 'Error';
+    }
+}
+// Core functions
+async function handleAddWebsite(event) {
+    event.preventDefault();
 
-        updateIntervalButton.addEventListener('click', () => {
-            const newInterval = intervalInput.value;
-            if (newInterval !== originalInterval.toString()) {
-                updateInterval(website.id, newInterval);
-                originalInterval = parseInt(newInterval);
-                updateIntervalButton.disabled = true;
-            }
-        });
+    const urls = websiteUrlInput.value
+        .split(/[,;]+/)
+        .map(url => url.trim())
+        .filter(url => url);
 
-        const websiteLink = item.querySelector('.website-link');
-        websiteLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Website link clicked:', website.url);
-            fetch(`/api/websites/${website.id}/visit`, { method: 'POST' })
-                .then(response => response.json())
-                .then(updatedWebsite => {
-                    console.log('Updated website:', updatedWebsite);
-                    const statusIndicator = item.querySelector('.status-indicator');
-                    statusIndicator.className = `status-indicator ${getStatusClass(updatedWebsite)}`;
+    // Add early return if no valid URLs
+    if (urls.length === 0) {
+        return;  // Silently return if no URLs provided
+    }
 
-                    // Update the last visited time
-                    const lastVisitedElement = item.querySelector('.last-visited');
-                    lastVisitedElement.textContent = `Last visited: ${new Date(updatedWebsite.last_visited + 'Z').toLocaleString()}`;
+    const interval = parseInt(checkIntervalInput.value);
 
-                    // Try to open the link in a new tab
-                    const newWindow = window.open(website.url, '_blank');
-                    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-                        console.error('Pop-up blocked or failed to open new window.');
-                        alert('The link could not be opened due to pop-up blocker settings. Please allow pop-ups for this site or use the following URL: ' + website.url);
+    // Validate interval
+    if (isNaN(interval) || interval < 1 || interval > 24) {
+        alert('Please enter a valid interval between 1 and 24 hours');
+        return;
+    }
 
-                        // Create a temporary input element to copy the URL
-                        const tempInput = document.createElement('input');
-                        tempInput.value = website.url;
-                        document.body.appendChild(tempInput);
-                        tempInput.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(tempInput);
+    // Validate URLs
+    const invalidUrls = urls.filter(url => !isValidUrl(url));
+    if (invalidUrls.length > 0) {
+        alert(`Please enter valid URLs (must start with http:// or https://). Invalid URLs:\n${invalidUrls.join('\n')}`);
+        return;
+    }
 
-                        alert('The URL has been copied to your clipboard.');
-                    } else {
-                        console.log('New window opened successfully');
-                    }
+    try {
+        let response;
+        let data;
+
+        if (urls.length > 1) {
+            // Use bulk endpoint for multiple URLs
+            response = await fetch('/api/websites/bulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    urls: urls,
+                    interval: interval
                 })
-                .catch(error => {
-                    console.error('Error marking website as visited:', error);
-                    alert('An error occurred while trying to visit the website. Please try again.');
-                });
-        });
-
-        return item;
-    }
-
-    function addWebsite(url, interval) {
-        console.log(`Adding website: ${url} with interval: ${interval}`);
-        fetch('/api/websites', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ url, interval: parseInt(interval) }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw err; });
-                }
-                return response.json();
-            })
-            .then(newWebsite => {
-                console.log('Website added successfully:', newWebsite);
-                const websiteItem = createWebsiteItem(newWebsite);
-                websiteList.insertBefore(websiteItem, websiteList.firstChild);
-                websiteUrlInput.value = '';
-                checkIntervalInput.value = '24';
-            })
-            .catch(error => {
-                console.error('Error adding website:', error);
-                alert(`Failed to add website: ${error.error || 'Unknown error'}`);
             });
-    }
+        } else {
+            response = await fetch('/api/websites', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    url: urls[0],
+                    interval: interval
+                })
+            });
+        }
 
-    function removeWebsite(id) {
-        fetch(`/api/websites/${id}`, { method: 'DELETE' })
-            .then(() => {
-                const item = websiteList.querySelector(`.website-item[data-id="${id}"]`);
-                if (item) {
-                    item.remove();
+        data = await response.json();
+
+        if (response.ok) {
+            websiteUrlInput.value = '';
+            
+            // Show feedback for both single and bulk operations
+            const summary = [
+                `Added: ${data.added} URL${data.added !== 1 ? 's' : ''}`,
+                data.details.skipped.length > 0 ? `Skipped: ${data.details.skipped.length}` : null,
+                data.details.failed.length > 0 ? `Failed: ${data.details.failed.length}` : null
+            ].filter(Boolean).join('\n');
+
+            // Show detailed feedback if there are skipped or failed URLs
+            if (data.details.skipped.length > 0 || data.details.failed.length > 0) {
+                let details = [];
+                
+                if (data.details.skipped.length > 0) {
+                    details.push('\nSkipped URLs:');
+                    data.details.skipped.forEach(item => {
+                        details.push(`${item.url} - ${item.reason}`);
+                    });
                 }
-            })
-            .catch(error => console.error('Error removing website:', error));
+                
+                if (data.details.failed.length > 0) {
+                    details.push('\nFailed URLs:');
+                    data.details.failed.forEach(item => {
+                        details.push(`${item.url} - ${item.reason}`);
+                    });
+                }
+
+                alert(`${summary}\n${details.join('\n')}`);
+            } else if (data.added > 0) {
+                alert(summary);
+            }
+            
+            window.location.reload();
+        } else {
+            throw new Error(data.message || `Server error: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Full error:', error);
+        alert(`Failed to add website(s): ${error.message}`);
+    }
+}
+
+// Update interval function
+window.updateInterval = async function(websiteId) {
+    const input = document.querySelector(`input[data-website-id="${websiteId}"]`);
+    const updateBtn = input.parentElement.querySelector('.update-btn');
+    const interval = parseInt(input.value);
+
+    if (isNaN(interval) || interval < 1 || interval > 24) {
+        alert('Please enter a valid interval between 1 and 24 hours');
+        return;
     }
 
-    function updateInterval(id, newInterval) {
-        const item = websiteList.querySelector(`.website-item[data-id="${id}"]`);
-        const intervalInput = item.querySelector('.interval-input');
-        const updateButton = item.querySelector('.update-interval');
-
-        intervalInput.disabled = true;
-        updateButton.disabled = true;
-
-        fetch(`/api/websites/${id}/interval`, {
+    try {
+        const response = await fetch(`/api/websites/${websiteId}/interval`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ interval: parseInt(newInterval) }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update interval');
-                }
-                return response.json();
+            body: JSON.stringify({
+                interval: interval
             })
-            .then(updatedWebsite => {
-                intervalInput.value = updatedWebsite.check_interval;
-                console.log('Interval updated successfully:', updatedWebsite);
-            })
-            .catch(error => {
-                console.error('Error updating interval:', error);
-                alert('Failed to update interval. Please try again.');
-                intervalInput.value = newInterval;
-            })
-            .finally(() => {
-                intervalInput.disabled = false;
-                updateButton.disabled = true;
-            });
-    }
+        });
 
-    function getStatusClass(website) {
-        console.log('Calculating status for website:', website);
-        if (!website.is_reachable) {
-            console.log('Website is not reachable');
-            return 'status-red';
-        }
+        const data = await response.json();
 
-        const lastVisited = website.last_visited ? new Date(website.last_visited + 'Z') : null;
-        const lastChange = website.last_change ? new Date(website.last_change + 'Z') : null;
-
-        if (lastChange && lastVisited && lastChange > lastVisited) {
-            console.log('Content changed since last visit');
-            return 'status-green';
-        }
-
-        console.log('No changes or no visit yet');
-        return 'status-gray';
-    }
-
-    function isValidUrl(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    }
-
-    addButton.addEventListener('click', () => {
-        console.log('Add button clicked');
-        const url = websiteUrlInput.value.trim();
-        const interval = checkIntervalInput.value;
-        console.log(`Attempting to add website: ${url} with interval: ${interval}`);
-        if (url && isValidUrl(url)) {
-            addWebsite(url, interval);
+        if (response.ok) {
+            updateBtn.disabled = true;
+            window.location.reload();
         } else {
-            console.error('Invalid URL');
-            alert('Please enter a valid URL');
+            throw new Error(data.message || 'Failed to update interval');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Failed to update interval');
+    }
+};
+
+// Add input change handler to enable/disable update button
+function setupIntervalInputs() {
+    document.querySelectorAll('.interval-input').forEach(input => {
+        const updateBtn = input.parentElement.querySelector('.update-btn');
+        const originalValue = input.value;
+        
+        // Initially disable update button
+        updateBtn.disabled = true;
+        
+        // Enable/disable button based on value changes
+        input.addEventListener('input', () => {
+            const newValue = input.value;
+            const isValid = !isNaN(newValue) && newValue >= 1 && newValue <= 24;
+            updateBtn.disabled = newValue === originalValue || !isValid;
+        });
+        
+        // Handle Enter key
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !updateBtn.disabled) {
+                e.preventDefault();
+                updateInterval(input.dataset.websiteId);
+            }
+        });
+    });
+}
+
+// Delete website function
+window.deleteWebsite = async function(websiteId) {
+    if (!confirm('Are you sure you want to delete this website?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/websites/${websiteId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to delete website');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Failed to delete website');
+    }
+};
+
+// Move updateLastVisited function definition before DOMContentLoaded
+async function updateLastVisited(websiteId) {
+    try {
+        const response = await fetch(`/api/websites/${websiteId}/visit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const linkCard = document.querySelector(`[data-website-id="${websiteId}"]`);
+            const visitedSpan = linkCard.querySelector('.visit-time .datetime');
+            if (visitedSpan && data.last_visited) {
+                visitedSpan.setAttribute('data-utc', data.last_visited);
+                visitedSpan.textContent = formatLocalDateTime(data.last_visited);
+                
+                // Update status dot
+                const statusDot = linkCard.querySelector('.status-dot');
+                if (statusDot) {
+                    statusDot.classList.remove('status-green');
+                    statusDot.classList.add('status-gray');
+                }
+            }
+        } else {
+            console.error('Failed to update last visited timestamp');
+        }
+    } catch (error) {
+        console.error('Error updating last visited:', error);
+    }
+}
+
+// Add the remove all function
+async function removeAllWebsites() {
+    if (!confirm('Are you sure you want to remove all websites? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/websites/all', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to remove all websites');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Failed to remove all websites');
+    }
+}
+
+// Initialize everything when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize input elements
+    websiteUrlInput = document.getElementById('website-url');
+    checkIntervalInput = document.getElementById('check-interval');
+    addButton = document.getElementById('add-button');
+
+    // Set up event listeners
+    if (addButton) {
+        addButton.addEventListener('click', handleAddWebsite);
+    }
+
+    if (websiteUrlInput) {
+        websiteUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddWebsite(e);
+            }
+        });
+    }
+
+    if (checkIntervalInput) {
+        checkIntervalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddWebsite(e);
+            }
+        });
+    }
+
+    // Set up notification handlers
+    const notificationEmail = document.getElementById('notification-email');
+    const notificationsEnabled = document.getElementById('notifications-enabled');
+    const saveNotifications = document.getElementById('save-notifications');
+    
+    if (saveNotifications) {
+        saveNotifications.addEventListener('click', async () => {
+            const email = notificationEmail.value.trim();
+            const enabled = notificationsEnabled.checked;
+            
+            if (enabled && !email) {
+                alert('Please enter an email address to enable notifications');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/user/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        enabled: enabled
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to save notification settings');
+                }
+
+                alert('Notification settings saved successfully');
+            } catch (error) {
+                console.error('Error saving notification settings:', error);
+                alert(error.message || 'Failed to save notification settings. Please try again.');
+            }
+        });
+    }
+
+    // Handle paste events to support all use cases
+    websiteUrlInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pastedText = e.clipboardData.getData('text');
+        
+        // Get cursor position and current value
+        const startPos = websiteUrlInput.selectionStart;
+        const endPos = websiteUrlInput.selectionEnd;
+        const currentValue = websiteUrlInput.value;
+        
+        // Check if pasted text contains multiple URLs
+        const hasMultipleUrls = /[\n,;\s]/.test(pastedText);
+        
+        if (hasMultipleUrls) {
+            // Handle multiple URLs
+            const urls = pastedText
+                .split(/[\n,;\s]+/)
+                .map(url => url.trim())
+                .filter(url => url);
+                
+            // Check if we need a comma (if there's content and it doesn't end with a comma)
+            const needsComma = currentValue && 
+                              startPos === currentValue.length && 
+                              !currentValue.trim().endsWith(',');
+            const prefix = needsComma ? ', ' : '';
+            
+            // Join URLs with commas
+            const formattedUrls = prefix + urls.join(', ');
+            
+            // Insert at cursor position
+            websiteUrlInput.value = currentValue.substring(0, startPos) + 
+                                  formattedUrls + 
+                                  currentValue.substring(endPos);
+                                  
+            // Move cursor to end of pasted text
+            const newPos = startPos + formattedUrls.length;
+            websiteUrlInput.setSelectionRange(newPos, newPos);
+        } else {
+            // Handle single URL
+            // Check if we need a comma
+            const needsComma = currentValue && 
+                              startPos === currentValue.length && 
+                              !currentValue.trim().endsWith(',');
+            const prefix = needsComma ? ', ' : '';
+            
+            // Insert at cursor position
+            websiteUrlInput.value = currentValue.substring(0, startPos) + 
+                                  prefix + pastedText + 
+                                  currentValue.substring(endPos);
+                                  
+            // Move cursor after pasted text
+            const newPos = startPos + prefix.length + pastedText.length;
+            websiteUrlInput.setSelectionRange(newPos, newPos);
         }
     });
 
-    websiteUrlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addButton.click();
-        }
+    // Setup interval input handlers
+    setupIntervalInputs();
+
+    // Convert all UTC timestamps to local time
+    document.querySelectorAll('.datetime').forEach(element => {
+        const utcDate = element.getAttribute('data-utc');
+        element.textContent = formatLocalDateTime(utcDate);
     });
 
-    // Add event listener for Enter key on checkIntervalInput
-    checkIntervalInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addButton.click();
-        }
-    });
+    // Set up remove all button
+    const removeAllButton = document.getElementById('remove-all-button');
+    if (removeAllButton) {
+        removeAllButton.addEventListener('click', removeAllWebsites);
+    }
 
-    // Initial fetch of websites
-    fetchWebsites();
+    const monitor = new WebsiteMonitor();
+
+    // Add click handler to links
+    document.querySelectorAll('.link-url').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const websiteId = link.closest('.link-card').dataset.websiteId;
+            updateLastVisited(websiteId);
+        });
+    });
 });
+
+class WebsiteCard {
+    constructor(cardElement) {
+        this.card = cardElement;
+        this.websiteId = cardElement.dataset.websiteId;
+        this.statusDot = cardElement.querySelector('.status-dot');
+        this.visitedSpan = cardElement.querySelector('.visit-time .datetime');
+        this.lastCheckSpan = cardElement.querySelector('.check-time .datetime');
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        const link = this.card.querySelector('.link-url');
+        link.addEventListener('click', () => this.handleVisit());
+    }
+
+    async handleVisit() {
+        try {
+            const response = await fetch(`/api/websites/${this.websiteId}/visit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                this.updateUI(data);
+            }
+        } catch (error) {
+            console.error('Error updating visit:', error);
+        }
+    }
+
+    updateUI(data) {
+        // Update timestamps
+        if (data.last_visited) {
+            this.visitedSpan.setAttribute('data-utc', data.last_visited);
+            this.visitedSpan.textContent = formatLocalDateTime(data.last_visited);
+        }
+        if (data.last_check) {
+            this.lastCheckSpan.setAttribute('data-utc', data.last_check);
+            this.lastCheckSpan.textContent = formatLocalDateTime(data.last_check);
+        }
+        
+        // Update status
+        this.statusDot.className = 'status-dot';
+        if (!data.is_reachable) {
+            this.statusDot.classList.add('status-red');
+        } else if (data.last_check > data.last_visited) {
+            this.statusDot.classList.add('status-green');
+        } else {
+            this.statusDot.classList.add('status-gray');
+        }
+    }
+}
+
+class WebsiteMonitor {
+    constructor() {
+        this.cards = new Map();
+        this.initializeCards();
+        this.startPolling();
+    }
+
+    initializeCards() {
+        document.querySelectorAll('.link-card').forEach(cardElement => {
+            const card = new WebsiteCard(cardElement);
+            this.cards.set(card.websiteId, card);
+        });
+    }
+
+    async pollUpdates() {
+        try {
+            const response = await fetch('/api/websites');
+            const websites = await response.json();
+            
+            websites.forEach(website => {
+                const card = this.cards.get(website.id.toString());
+                if (card) {
+                    card.updateUI(website);
+                }
+            });
+        } catch (error) {
+            console.error('Error polling updates:', error);
+        }
+    }
+
+    startPolling() {
+        // Poll every 30 seconds
+        setInterval(() => this.pollUpdates(), 30000);
+    }
+}
+

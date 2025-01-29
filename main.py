@@ -8,15 +8,17 @@ from flask_wtf import FlaskForm
 from flask_migrate import Migrate
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import text
 from urllib.parse import urlparse
 from dotenv import load_dotenv
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from urllib.error import URLError
 from scheduler import init_scheduler
 from apscheduler.schedulers.background import BackgroundScheduler
-from tasks import check_website_changes
+from tasks import check_website_changes, schedule_periodic_checks
+from email_validator import validate_email
+from flask_mail import Mail
 
 load_dotenv()
 
@@ -37,6 +39,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize SQLAlchemy and Flask-Migrate
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# Mail configuration
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+# Initialize Flask-Mail
+mail = Mail(app)
 
 try:
     # Test the connection
@@ -108,10 +121,12 @@ class RegistrationForm(FlaskForm):
 @app.route('/')
 @login_required
 def index():
-    session.pop('_flashes', None)
     app.logger.debug(f"Index route accessed. User authenticated: {current_user.is_authenticated}")
     app.logger.debug(f"Current user: {current_user}")
-    return render_template('index.html')
+    # Order by date_added descending (newest first)
+    websites = Website.query.filter_by(user_id=current_user.id).order_by(Website.date_added.desc()).all()
+    app.logger.debug(f"Found {len(websites)} websites for user {current_user.id}")
+    return render_template('index.html', websites=websites)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -195,36 +210,71 @@ def get_websites():
     websites = Website.query.filter_by(user_id=current_user.id).all()
     return jsonify([website.to_dict() for website in websites])
 
+def check_website_reachability(url, timeout=5):
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        }
+        req = Request(url, headers=headers)
+        response = urlopen(req, timeout=timeout)
+        return True, response
+    except Exception as e:
+        app.logger.error(f"Error checking {url}: {str(e)}")
+        return False, None
+
 @app.route('/api/websites', methods=['POST'])
 @login_required
 def add_website():
     data = request.json
     url = data['url']
-    current_time = datetime.utcnow()
+    current_time = datetime.now(timezone.utc)
+
+    # Check if URL already exists for this user
+    existing_website = Website.query.filter_by(url=url, user_id=current_user.id).first()
+    if existing_website:
+        return jsonify({
+            'error': 'URL already exists',
+            'message': 'This website is already being monitored',
+            'added': 0,
+            'details': {
+                'skipped': [{'url': url, 'reason': 'Already exists'}],
+                'failed': []
+            }
+        }), 409
 
     try:
-        response = urlopen(url)
-        is_reachable = True
-        content = response.read().decode('utf-8')
-        last_check = datetime.utcnow()
-    except URLError:
-        is_reachable = False
-        content = None
-        last_check = None
-    
-    new_website = Website(
-        url=url, 
-        check_interval=data['interval'], 
-        user_id=current_user.id,
-        is_reachable=is_reachable,
-        last_check=last_check,
-        last_content=content,
-        last_visited=current_time,
-        date_added=current_time
-    )
-    db.session.add(new_website)
-    db.session.commit()
-    return jsonify(new_website.to_dict()), 201
+        new_website = Website.create(url, data['interval'], current_user.id, current_time)
+        db.session.add(new_website)
+        db.session.commit()
+
+        # Queue for immediate check
+        check_website_changes([new_website.id])
+
+        return jsonify({
+            'added': 1,
+            'details': {
+                'skipped': [],
+                'failed': []
+            },
+            **new_website.to_dict()
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error adding website {url}: {str(e)}")
+        return jsonify({
+            'error': 'Failed to add website',
+            'message': str(e),
+            'added': 0,
+            'details': {
+                'skipped': [],
+                'failed': [{'url': url, 'reason': str(e)}]
+            }
+        }), 500
 
 @app.route('/api/websites/<int:id>', methods=['DELETE'])
 @login_required
@@ -238,18 +288,158 @@ def remove_website(id):
 @login_required
 def update_interval(id):
     website = Website.query.filter_by(id=id, user_id=current_user.id).first_or_404()
-    data = request.json
-    website.check_interval = data['interval']
+    data = request.get_json()
+    
+    if 'interval' not in data:
+        return jsonify({'error': 'Missing interval parameter'}), 400
+        
+    interval = data['interval']
+    
+    # Validate interval
+    if not isinstance(interval, (int, float)) or interval < 1 or interval > 24:
+        return jsonify({'error': 'Invalid interval. Must be between 1 and 24 hours'}), 400
+    
+    website.check_interval = interval
     db.session.commit()
+    
     return jsonify(website.to_dict())
 
 @app.route('/api/websites/<int:id>/visit', methods=['POST'])
 @login_required
-def visit_website(id):
+def update_last_visited(id):
     website = Website.query.filter_by(id=id, user_id=current_user.id).first_or_404()
-    website.last_visited = datetime.utcnow()
+    website.last_visited = datetime.now(timezone.utc)
+    website.last_change = None  # Reset change detection when visiting
     db.session.commit()
     return jsonify(website.to_dict())
+
+@app.route('/api/websites/bulk', methods=['POST'])
+@login_required
+def bulk_add_websites():
+    data = request.json
+    urls = data.get('urls', [])
+    interval = data.get('interval', 24)
+    current_time = datetime.now(timezone.utc)
+    
+    results = {
+        'successful': [],
+        'failed': [],
+        'skipped': []
+    }
+    
+    # Get existing URLs for this user to avoid duplicates
+    existing_urls = set(
+        website.url for website in 
+        Website.query.filter_by(user_id=current_user.id).all()
+    )
+    
+    # Batch process all URLs
+    websites_to_add = []
+    for url in urls:
+        url = url.strip()
+        if not url:
+            continue
+            
+        if url in existing_urls:
+            results['skipped'].append({
+                'url': url,
+                'reason': 'Already exists'
+            })
+            continue
+        
+        try:
+            # Basic URL validation
+            if not url.startswith(('http://', 'https://')):
+                results['failed'].append({
+                    'url': url,
+                    'reason': 'Invalid URL format'
+                })
+                continue
+                
+            # Create website object - initially not checked
+            website = Website.create(url, interval, current_user.id, current_time)
+            websites_to_add.append(website)
+            results['successful'].append(url)
+            
+        except Exception as e:
+            results['failed'].append({
+                'url': url,
+                'reason': str(e)
+            })
+    
+    try:
+        if websites_to_add:
+            db.session.bulk_save_objects(websites_to_add)
+            db.session.commit()
+            
+            # Schedule immediate checks in background
+            try:
+                website_ids = [w.id for w in websites_to_add]
+                check_website_changes(website_ids)
+            except Exception as e:
+                app.logger.error(f"Error scheduling checks: {str(e)}")
+        
+        return jsonify({
+            'added': len(results['successful']),
+            'skipped': len(results['skipped']),
+            'failed': len(results['failed']),
+            'details': results
+        })
+                
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error in bulk add: {str(e)}")
+        return jsonify({
+            'error': 'Failed to add websites',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/user/notifications', methods=['POST'])
+@login_required
+def update_notification_settings():
+    data = request.json
+    email = data.get('email', '').strip()
+    enabled = data.get('enabled', False)
+    
+    if enabled and not email:
+        return jsonify({'error': 'Email required when notifications are enabled'}), 400
+    
+    if email and not validate_email(email):
+        return jsonify({'error': 'Invalid email address'}), 400
+    
+    current_user.notification_email = email if enabled else None
+    current_user.notifications_enabled = enabled
+    db.session.commit()
+    
+    return jsonify({'message': 'Notification settings updated successfully'})
+
+@app.route('/debug/websites')
+@login_required
+def debug_websites():
+    websites = Website.query.filter_by(user_id=current_user.id).all()
+    return jsonify([{
+        'id': w.id,
+        'url': w.url,
+        'check_interval': w.check_interval,
+        'is_reachable': w.is_reachable,
+        'user_id': w.user_id
+    } for w in websites])
+
+@app.route('/api/websites/all', methods=['DELETE'])
+@login_required
+def remove_all_websites():
+    try:
+        # Delete all websites for the current user
+        Website.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+        return '', 204
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error removing all websites: {str(e)}")
+        return jsonify({
+            'error': 'Failed to remove all websites',
+            'message': str(e)
+        }), 500
 
 if __name__ == '__main__':
     create_tables()
