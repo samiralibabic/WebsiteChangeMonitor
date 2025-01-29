@@ -237,8 +237,8 @@ def check_website_reachability(url, timeout=5):
             response = urlopen(req, timeout=timeout)
             return True, response
         except HTTPError as he:
-            # 304 Not Modified is actually a success case
-            if he.code == 304:
+            # Both 304 (Not Modified) and 3xx (Redirects) are success cases
+            if he.code == 304 or (300 <= he.code < 400):
                 return True, he
             raise  # re-raise other HTTP errors
     except Exception as e:
