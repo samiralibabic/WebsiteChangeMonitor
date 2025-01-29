@@ -25,6 +25,19 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+# Add datetime filter
+def format_datetime(value):
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value.rstrip('Z'))
+        except ValueError:
+            return value
+    return value.strftime('%Y-%m-%d %H:%M:%S UTC')
+
+app.jinja_env.filters['format_datetime'] = format_datetime
+
 # Hard-coded SQLite database URI
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "site.db")}'
