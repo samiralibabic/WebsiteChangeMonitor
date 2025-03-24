@@ -11,6 +11,4 @@ services:
       - "5002:5002"
     volumes:
       - ./instance:/app/instance
-    networks:
-      - caddy_net
     restart: unless-stopped
