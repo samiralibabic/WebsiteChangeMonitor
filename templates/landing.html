@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Website Change Monitor | Track Website Changes Instantly{% endblock %}
+
+{% block meta_description %}Website Change Monitor helps teams track website updates, detect changes, and get alerts the moment content shifts. Monitor competitors, docs, and pages with confidence.{% endblock %}
+
+{% block head %}
+<meta property="og:title" content="Website Change Monitor | Track Website Changes Instantly">
+<meta property="og:description" content="Monitor websites for changes, get alerts, and stay ahead of updates across competitors, pricing, docs, and critical pages.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Website Change Monitor | Track Website Changes Instantly">
+<meta name="twitter:description" content="Monitor websites for changes, get alerts, and stay ahead of updates across competitors, pricing, docs, and critical pages.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Website Change Monitor",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": "Track website updates, detect changes, and receive alerts when important pages change.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<section class="landing-hero">
+    <div class="hero-content">
+        <p class="eyebrow">Stay ahead of website changes</p>
+        <h1>Know the moment a website updates.</h1>
+        <p class="hero-subtitle">
+            Website Change Monitor tracks the pages that matter—pricing, policies, docs, and competitor sites—so you
+            never miss critical updates. Set it once, get alerted instantly.
+        </p>
+        <div class="hero-actions">
+            <a class="btn-primary" href="{{ url_for('register') }}">Start monitoring free</a>
+            <a class="btn-secondary" href="{{ url_for('login') }}">See your dashboard</a>
+        </div>
+        <div class="trust-bar">
+            <span>Trusted for monitoring</span>
+            <div class="trust-logos">
+                <span>Product</span>
+                <span>Pricing</span>
+                <span>Compliance</span>
+                <span>Docs</span>
+                <span>Competitors</span>
+            </div>
+        </div>
+    </div>
+    <div class="hero-card">
+        <div class="hero-card-header">
+            <span class="status-pill status-live">Live monitoring</span>
+            <span class="status-pill status-interval">Every 6 hours</span>
+        </div>
+        <h3>Change detected on pricing page</h3>
+        <p>New feature tiers published 12 minutes ago. Compare, share, and act faster.</p>
+        <div class="hero-card-grid">
+            <div>
+                <span class="metric">4,821</span>
+                <span class="metric-label">Pages tracked</span>
+            </div>
+            <div>
+                <span class="metric">98%</span>
+                <span class="metric-label">Faster response</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <h2>Built for teams who need clarity, fast</h2>
+        <p>From product and marketing teams to compliance and ops, monitor changes without manual checking.</p>
+    </div>
+    <div class="feature-grid">
+        <article class="feature-card">
+            <h3>Instant change detection</h3>
+            <p>Receive alerts the moment a monitored page updates, so you can react before anyone else.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Smart scheduling</h3>
+            <p>Set custom check intervals for every website and balance speed with efficiency.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Reliable uptime signals</h3>
+            <p>Track reachability and spot outages with clear status indicators and history.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Simple, organized dashboard</h3>
+            <p>Keep every website in one place, with metadata and timestamps ready for action.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Email notifications</h3>
+            <p>Get notified when monitored sites become unreachable or content changes unexpectedly.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Bulk URL onboarding</h3>
+            <p>Add dozens of URLs at once to cover entire ecosystems or competitive landscapes.</p>
+        </article>
+    </div>
+</section>
+
+<section class="section section-alt">
+    <div class="section-heading">
+        <h2>Monitor every update that impacts revenue</h2>
+        <p>Stay ahead of pricing moves, policy shifts, and product launches with clear visibility.</p>
+    </div>
+    <div class="use-case-grid">
+        <div class="use-case-card">
+            <h3>Pricing & plans</h3>
+            <p>Detect changes to competitor pricing and packaging to keep your go-to-market sharp.</p>
+        </div>
+        <div class="use-case-card">
+            <h3>Compliance & legal</h3>
+            <p>Track updates to terms, SLAs, and regulatory content before they affect customers.</p>
+        </div>
+        <div class="use-case-card">
+            <h3>Product launches</h3>
+            <p>Watch product pages and documentation to know exactly when new features go live.</p>
+        </div>
+        <div class="use-case-card">
+            <h3>Vendor reliability</h3>
+            <p>Monitor uptime pages and critical notices so you can communicate quickly.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <span class="metric">10x</span>
+            <span class="metric-label">Faster competitive response</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric">24/7</span>
+            <span class="metric-label">Continuous monitoring</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric">0</span>
+            <span class="metric-label">Manual checks required</span>
+        </div>
+    </div>
+</section>
+
+<section class="section cta-section">
+    <div class="cta-content">
+        <h2>Start monitoring in minutes</h2>
+        <p>Create your workspace, add URLs, and get notified when updates happen. No complex setup required.</p>
+        <div class="hero-actions">
+            <a class="btn-primary" href="{{ url_for('register') }}">Create your free account</a>
+            <a class="btn-secondary" href="{{ url_for('login') }}">Sign in</a>
+        </div>
+    </div>
+</section>
+
+<section class="section faq-section">
+    <div class="section-heading">
+        <h2>Frequently asked questions</h2>
+    </div>
+    <div class="faq-grid">
+        <div class="faq-card">
+            <h3>How often can I check a website?</h3>
+            <p>Choose custom intervals per site, from hourly monitoring to daily or weekly checks.</p>
+        </div>
+        <div class="faq-card">
+            <h3>What kinds of changes are detected?</h3>
+            <p>We track content updates, availability changes, and reachability status for monitored URLs.</p>
+        </div>
+        <div class="faq-card">
+            <h3>Can I track multiple websites at once?</h3>
+            <p>Yes. Paste multiple URLs to onboard dozens of sites in seconds.</p>
+        </div>
+        <div class="faq-card">
+            <h3>Do I need to install anything?</h3>
+            <p>No setup required. Website Change Monitor runs in the browser and starts immediately.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
