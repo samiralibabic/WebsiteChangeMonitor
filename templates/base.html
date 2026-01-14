@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Website Change Monitor{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Track website updates automatically with Website Change Monitor. Get alerts, compare changes, and stay ahead of important updates.{% endblock %}">
+    <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     <div class="container">
+        {% block header %}
         <header>
             <h1>Website Change Monitor</h1>
             <nav>
@@ -21,6 +25,7 @@
                 {% endif %}
             </nav>
         </header>
+        {% endblock %}
         
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -45,6 +50,7 @@
         <main>
             {% block content %}{% endblock %}
         </main>
+        {% block footer %}{% endblock %}
     </div>
 </body>
 </html>

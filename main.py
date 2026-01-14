@@ -40,7 +40,9 @@ app.jinja_env.filters['format_datetime'] = format_datetime
 
 # Hard-coded SQLite database URI
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "site.db")}'
+instance_dir = os.path.join(basedir, "instance")
+os.makedirs(instance_dir, exist_ok=True)
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instance_dir, "site.db")}'
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')
 
 # Set up logging
@@ -132,14 +134,15 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Register')
 
 @app.route('/')
-@login_required
 def index():
     app.logger.debug(f"Index route accessed. User authenticated: {current_user.is_authenticated}")
     app.logger.debug(f"Current user: {current_user}")
-    # Order by date_added descending (newest first)
-    websites = Website.query.filter_by(user_id=current_user.id).order_by(Website.date_added.desc()).all()
-    app.logger.debug(f"Found {len(websites)} websites for user {current_user.id}")
-    return render_template('index.html', websites=websites)
+    if current_user.is_authenticated:
+        # Order by date_added descending (newest first)
+        websites = Website.query.filter_by(user_id=current_user.id).order_by(Website.date_added.desc()).all()
+        app.logger.debug(f"Found {len(websites)} websites for user {current_user.id}")
+        return render_template('index.html', websites=websites)
+    return render_template('landing.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
