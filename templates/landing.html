@@ -31,21 +31,6 @@
 
 {% block body_class %}landing-page{% endblock %}
 
-{% block header %}
-<header class="landing-header">
-    <div class="brand">
-        <a href="{{ url_for('index') }}" class="brand-mark">Website Change Monitor</a>
-    </div>
-    <nav class="landing-nav">
-        <a href="#features">Features</a>
-        <a href="#use-cases">Use cases</a>
-        <a href="#faq">FAQ</a>
-        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-        <a class="nav-cta" href="{{ url_for('register') }}">Start free</a>
-    </nav>
-</header>
-{% endblock %}
-
 {% block content %}
 <section class="landing-hero">
     <div class="hero-content">
@@ -90,7 +75,7 @@
     </div>
 </section>
 
-<section class="section" id="features">
+<section class="section">
     <div class="section-heading">
         <h2>Built for teams who need clarity, fast</h2>
         <p>From product and marketing teams to compliance and ops, monitor changes without manual checking.</p>
@@ -123,7 +108,7 @@
     </div>
 </section>
 
-<section class="section section-alt" id="use-cases">
+<section class="section section-alt">
     <div class="section-heading">
         <h2>Monitor every update that impacts revenue</h2>
         <p>Stay ahead of pricing moves, policy shifts, and product launches with clear visibility.</p>
@@ -165,7 +150,7 @@
     </div>
 </section>
 
-<section class="section cta-section" id="cta">
+<section class="section cta-section">
     <div class="cta-content">
         <h2>Start monitoring in minutes</h2>
         <p>Create your workspace, add URLs, and get notified when updates happen. No complex setup required.</p>
@@ -176,7 +161,7 @@
     </div>
 </section>
 
-<section class="section faq-section" id="faq">
+<section class="section faq-section">
     <div class="section-heading">
         <h2>Frequently asked questions</h2>
     </div>
@@ -199,34 +184,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
-
-{% block footer %}
-<footer class="landing-footer">
-    <div class="footer-grid">
-        <div>
-            <h4>Website Change Monitor</h4>
-            <p>Track critical updates across your most important websites.</p>
-        </div>
-        <div>
-            <h5>Product</h5>
-            <a href="#features">Features</a>
-            <a href="#use-cases">Use cases</a>
-            <a href="#cta">Get started</a>
-        </div>
-        <div>
-            <h5>Resources</h5>
-            <a href="#faq">FAQ</a>
-            <a href="{{ url_for('login') }}">Sign in</a>
-            <a href="{{ url_for('register') }}">Create account</a>
-        </div>
-        <div>
-            <h5>Company</h5>
-            <span>Built for modern monitoring teams.</span>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <span>© Website Change Monitor. All rights reserved.</span>
-    </div>
-</footer>
 {% endblock %}

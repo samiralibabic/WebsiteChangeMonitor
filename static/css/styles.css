@@ -389,52 +389,6 @@ button:hover {
     border-bottom: none;
 }
 
-.landing-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1rem 0 2rem;
-}
-
-.brand {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.brand-mark {
-    text-decoration: none;
-    color: var(--text-primary);
-}
-
-.landing-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-}
-
-.landing-nav a {
-    text-decoration: none;
-    color: var(--text-primary);
-    font-weight: 600;
-}
-
-.landing-nav .nav-cta {
-    background: var(--primary);
-    color: var(--background);
-    padding: 0.6rem 1.2rem;
-    border-radius: 999px;
-}
-
-.landing-nav .nav-cta:hover {
-    background: var(--primary-dark);
-}
-
-.landing-nav .nav-link {
-    color: var(--text-secondary);
-}
-
 .landing-hero {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -672,69 +626,9 @@ button:hover {
     margin-bottom: 4rem;
 }
 
-.landing-footer {
-    margin-top: 4rem;
-    padding: 3rem 0 1.5rem;
-    border-top: 1px solid #e7eaf3;
-}
-
-.footer-grid {
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-
-.footer-grid h4,
-.footer-grid h5 {
-    margin-top: 0;
-    margin-bottom: 0.75rem;
-}
-
-.footer-grid a,
-.footer-grid span,
-.footer-grid p {
-    color: var(--text-secondary);
-    text-decoration: none;
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.footer-grid a:hover {
-    color: var(--primary);
-}
-
-.footer-bottom {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e7eaf3;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
 @media (max-width: 768px) {
-    .landing-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-        padding-bottom: 1rem;
-    }
-
-    .brand {
-        font-size: 1.1rem;
-    }
-
-    .landing-nav {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .landing-nav a {
-        font-size: 0.95rem;
-    }
-
     .landing-hero {
-        padding: 1.75rem;
-        border-radius: 20px;
+        padding: 2rem;
     }
 
     .hero-actions {
@@ -746,13 +640,9 @@ button:hover {
         text-align: center;
     }
 
-    .hero-card {
-        padding: 1.5rem;
-    }
-
     .section-alt,
     .cta-section {
-        padding: 1.75rem;
+        padding: 2rem;
     }
 }
 
