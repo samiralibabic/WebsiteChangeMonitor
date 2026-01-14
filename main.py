@@ -132,14 +132,15 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Register')
 
 @app.route('/')
-@login_required
 def index():
     app.logger.debug(f"Index route accessed. User authenticated: {current_user.is_authenticated}")
     app.logger.debug(f"Current user: {current_user}")
-    # Order by date_added descending (newest first)
-    websites = Website.query.filter_by(user_id=current_user.id).order_by(Website.date_added.desc()).all()
-    app.logger.debug(f"Found {len(websites)} websites for user {current_user.id}")
-    return render_template('index.html', websites=websites)
+    if current_user.is_authenticated:
+        # Order by date_added descending (newest first)
+        websites = Website.query.filter_by(user_id=current_user.id).order_by(Website.date_added.desc()).all()
+        app.logger.debug(f"Found {len(websites)} websites for user {current_user.id}")
+        return render_template('index.html', websites=websites)
+    return render_template('landing.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
