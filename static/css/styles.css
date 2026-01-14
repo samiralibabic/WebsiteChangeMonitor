@@ -774,6 +774,7 @@ button:hover {
     .landing-hero .btn-primary,
     .landing-hero .btn-secondary {
         width: 100%;
+        box-sizing: border-box;
     }
 
     .hero-card {
