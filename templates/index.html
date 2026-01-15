@@ -2,82 +2,92 @@
 
 {% block title %}Home - Website Change Monitor{% endblock %}
 
+{% block body_class %}app-page{% endblock %}
+
 {% block content %}
-    <div class="legend">
-        <div class="legend-item">
-            <span class="status-indicator">
-                <span class="status-dot status-green"></span>
-            </span>
-            <span>Online</span>
-        </div>
-        <div class="legend-item">
-            <span class="status-indicator">
-                <span class="status-dot status-red"></span>
-            </span>
-            <span>Offline</span>
-        </div>
-    </div>
-    <div id="instructions">
-        <h2>How to Use the Website Change Monitor</h2>
-        <ol>
-            <li><strong>Add Websites:</strong>
-                <ul>
-                    <li>Single website: Enter a URL and set how often to check for changes</li>
-                    <li>Multiple websites: Paste a list of URLs (one per line)</li>
-                </ul>
-            </li>
-            <li><strong>Manage Websites:</strong>
-                <ul>
-                    <li>Click any website URL to visit it and mark changes as seen</li>
-                    <li>Adjust check frequency anytime using the hours input</li>
-                    <li>Remove websites you no longer want to monitor</li>
-                </ul>
-            </li>
-        </ol>
-        <div class="pro-tips">
-            <h3>💡 Pro Tips:</h3>
-            <ul>
-                <li>Set shorter intervals (e.g., 1-6 hours) for frequently updated sites</li>
-                <li>Use longer intervals (e.g., 24-48 hours) for static content</li>
-                <li>Quickly add multiple URLs by copying and pasting from a list</li>
-            </ul>
-        </div>
-        <div class="status-legend">
-            <h3>Status Indicators:</h3>
-            <div class="status-grid">
-                <div class="status-item">
-                    <span class="status-dot status-green"></span>
-                    <div class="status-description">
-                        <strong>Changes Detected</strong>
-                        <span>New content since your last visit</span>
+    <section class="dashboard-hero">
+        <div class="dashboard-hero-main">
+            <p class="eyebrow">Dashboard</p>
+            <h1>Monitor every site in one workspace.</h1>
+            <p class="hero-subtitle">
+                Keep tabs on pricing, compliance, and critical pages with instant change alerts. Add URLs, tune
+                schedules, and manage notifications in a few clicks.
+            </p>
+            <div class="hero-actions">
+                <a class="btn-primary" href="#add-website">Add websites</a>
+                <a class="btn-secondary" href="#notification-settings">Manage alerts</a>
+            </div>
+            <div class="hero-info-grid">
+                <div class="hero-panel">
+                    <h2>How to use the monitor</h2>
+                    <ol>
+                        <li><strong>Add Websites:</strong>
+                            <ul>
+                                <li>Single website: Enter a URL and set how often to check for changes</li>
+                                <li>Multiple websites: Paste a list of URLs (one per line)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Manage Websites:</strong>
+                            <ul>
+                                <li>Click any website URL to visit it and mark changes as seen</li>
+                                <li>Adjust check frequency anytime using the hours input</li>
+                                <li>Remove websites you no longer want to monitor</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <div class="pro-tips">
+                        <h3>💡 Pro Tips:</h3>
+                        <ul>
+                            <li>Set shorter intervals (e.g., 1-6 hours) for frequently updated sites</li>
+                            <li>Use longer intervals (e.g., 24-48 hours) for static content</li>
+                            <li>Quickly add multiple URLs by copying and pasting from a list</li>
+                        </ul>
                     </div>
                 </div>
-                <div class="status-item">
-                    <span class="status-dot status-gray"></span>
-                    <div class="status-description">
-                        <strong>No Changes</strong>
-                        <span>Content is up to date</span>
-                    </div>
-                </div>
-                <div class="status-item">
-                    <span class="status-dot status-red"></span>
-                    <div class="status-description">
-                        <strong>Unreachable</strong>
-                        <span>Website is currently not accessible</span>
+                <div class="hero-panel">
+                    <h2>Status indicators</h2>
+                    <div class="hero-status-grid">
+                        <div class="hero-status-card">
+                            <span class="status-dot status-green"></span>
+                            <div class="status-description">
+                                <strong>Changes Detected</strong>
+                                <span>New content since your last visit</span>
+                            </div>
+                        </div>
+                        <div class="hero-status-card">
+                            <span class="status-dot status-gray"></span>
+                            <div class="status-description">
+                                <strong>No Changes</strong>
+                                <span>Content is up to date</span>
+                            </div>
+                        </div>
+                        <div class="hero-status-card">
+                            <span class="status-dot status-red"></span>
+                            <div class="status-description">
+                                <strong>Unreachable</strong>
+                                <span>Website is currently not accessible</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="add-website">
-        <label for="website-url">Website URL(s):</label>
-        <input type="text" id="website-url" placeholder="Enter or paste URLs (separate multiple with commas)" tabindex="1">
-        <label for="check-interval">Check frequency (hours):
-            <span class="tooltip-icon" title="How often the system should check for changes on this website. For example: 24 = check once per day">ⓘ</span>
-        </label>
-        <input type="number" id="check-interval" placeholder="Check frequency in hours" min="1" value="24" tabindex="2">
-        <button id="add-button" tabindex="3">Add Website</button>
-    </div>
+        <div class="dashboard-hero-side">
+            <div class="hero-panel hero-panel-form">
+                <h2>Add a website</h2>
+                <p>Paste one or more URLs to begin monitoring immediately.</p>
+                <div id="add-website">
+                    <label for="website-url">Website URL(s):</label>
+                    <input type="text" id="website-url" placeholder="Enter or paste URLs (separate multiple with commas)" tabindex="1">
+                    <label for="check-interval">Check frequency (hours):
+                        <span class="tooltip-icon" title="How often the system should check for changes on this website. For example: 24 = check once per day">ⓘ</span>
+                    </label>
+                    <input type="number" id="check-interval" placeholder="Check frequency in hours" min="1" value="24" tabindex="2">
+                    <button id="add-button" tabindex="3">Add Website</button>
+                </div>
+            </div>
+        </div>
+    </section>
     <div class="links-container">
         <!-- Debug output -->
         <div style="display:none">
@@ -166,8 +176,11 @@
             </div>
         {% endif %}
     </div>
-    <div id="notification-settings">
-        <h2>Email Notifications</h2>
+    <section id="notification-settings" class="panel notification-panel">
+        <div class="panel-header">
+            <h2>Email Notifications</h2>
+            <p>Choose where updates are delivered and toggle alerts for outages.</p>
+        </div>
         <div class="notification-form">
             <div class="form-group">
                 <label for="notification-email">Notification Email:</label>
@@ -185,6 +198,6 @@
             </div>
             <button id="save-notifications" class="btn-primary">Save Settings</button>
         </div>
-    </div>
+    </section>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}
