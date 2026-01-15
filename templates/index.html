@@ -2,23 +2,44 @@
 
 {% block title %}Home - Website Change Monitor{% endblock %}
 
+{% block body_class %}app-page{% endblock %}
+
 {% block content %}
-    <div class="legend">
-        <div class="legend-item">
-            <span class="status-indicator">
-                <span class="status-dot status-green"></span>
-            </span>
-            <span>Online</span>
+    <section class="dashboard-hero">
+        <div class="hero-content">
+            <p class="eyebrow">Dashboard</p>
+            <h1>Monitor every site in one workspace.</h1>
+            <p class="hero-subtitle">
+                Keep tabs on pricing, compliance, and critical pages with instant change alerts. Add URLs, tune
+                schedules, and manage notifications in a few clicks.
+            </p>
+            <div class="hero-actions">
+                <a class="btn-primary" href="#add-website">Add websites</a>
+                <a class="btn-secondary" href="#notification-settings">Manage alerts</a>
+            </div>
         </div>
-        <div class="legend-item">
-            <span class="status-indicator">
-                <span class="status-dot status-red"></span>
-            </span>
-            <span>Offline</span>
+        <div class="dashboard-card">
+            <h3>Your monitoring control center</h3>
+            <p>Track change status, update intervals, and recent checks at a glance.</p>
+            <div class="dashboard-metrics">
+                <div>
+                    <span class="metric">24/7</span>
+                    <span class="metric-label">Continuous checks</span>
+                </div>
+                <div>
+                    <span class="metric">Instant</span>
+                    <span class="metric-label">Alert delivery</span>
+                </div>
+            </div>
         </div>
-    </div>
-    <div id="instructions">
-        <h2>How to Use the Website Change Monitor</h2>
+    </section>
+
+    <section class="dashboard-grid">
+        <div class="panel" id="instructions">
+            <div class="panel-header">
+                <h2>How to use the monitor</h2>
+                <p>Follow these steps to start tracking every page that matters.</p>
+            </div>
         <ol>
             <li><strong>Add Websites:</strong>
                 <ul>
@@ -68,16 +89,23 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div id="add-website">
-        <label for="website-url">Website URL(s):</label>
-        <input type="text" id="website-url" placeholder="Enter or paste URLs (separate multiple with commas)" tabindex="1">
-        <label for="check-interval">Check frequency (hours):
-            <span class="tooltip-icon" title="How often the system should check for changes on this website. For example: 24 = check once per day">ⓘ</span>
-        </label>
-        <input type="number" id="check-interval" placeholder="Check frequency in hours" min="1" value="24" tabindex="2">
-        <button id="add-button" tabindex="3">Add Website</button>
-    </div>
+        </div>
+        <div class="panel panel-form">
+            <div class="panel-header">
+                <h2>Add a website</h2>
+                <p>Paste one or more URLs to begin monitoring immediately.</p>
+            </div>
+            <div id="add-website">
+                <label for="website-url">Website URL(s):</label>
+                <input type="text" id="website-url" placeholder="Enter or paste URLs (separate multiple with commas)" tabindex="1">
+                <label for="check-interval">Check frequency (hours):
+                    <span class="tooltip-icon" title="How often the system should check for changes on this website. For example: 24 = check once per day">ⓘ</span>
+                </label>
+                <input type="number" id="check-interval" placeholder="Check frequency in hours" min="1" value="24" tabindex="2">
+                <button id="add-button" tabindex="3">Add Website</button>
+            </div>
+        </div>
+    </section>
     <div class="links-container">
         <!-- Debug output -->
         <div style="display:none">
@@ -166,8 +194,11 @@
             </div>
         {% endif %}
     </div>
-    <div id="notification-settings">
-        <h2>Email Notifications</h2>
+    <section id="notification-settings" class="panel notification-panel">
+        <div class="panel-header">
+            <h2>Email Notifications</h2>
+            <p>Choose where updates are delivered and toggle alerts for outages.</p>
+        </div>
         <div class="notification-form">
             <div class="form-group">
                 <label for="notification-email">Notification Email:</label>
@@ -185,6 +216,6 @@
             </div>
             <button id="save-notifications" class="btn-primary">Save Settings</button>
         </div>
-    </div>
+    </section>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}
