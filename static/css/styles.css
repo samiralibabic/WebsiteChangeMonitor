@@ -190,6 +190,17 @@ h1 {
     box-shadow: 0 20px 50px rgba(31, 42, 68, 0.2);
 }
 
+.dashboard-hero-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dashboard-hero-side {
+    display: flex;
+    align-items: stretch;
+}
+
 .dashboard-hero h1 {
     color: #ffffff;
     text-align: left;
@@ -199,35 +210,75 @@ h1 {
     color: rgba(255, 255, 255, 0.8);
 }
 
-.dashboard-card {
+.hero-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.hero-panel {
     background: rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 18px;
+    padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(6px);
 }
 
-.dashboard-card h3 {
+.hero-panel h2 {
     margin-top: 0;
     color: #ffffff;
 }
 
-.dashboard-card p {
+.hero-panel p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-panel ol,
+.hero-panel ul {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.hero-panel-form #add-website {
+    margin-bottom: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.hero-panel-form #add-website label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-panel-form #add-website input {
+    background: #ffffff;
+    border-radius: 10px;
+}
+
+.hero-panel-form #add-website button {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.hero-status-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.hero-status-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.hero-status-card .status-description strong {
+    color: #ffffff;
+}
+
+.hero-status-card .status-description span {
     color: rgba(255, 255, 255, 0.75);
-}
-
-.dashboard-metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    align-items: start;
 }
 
 .panel {
@@ -244,18 +295,6 @@ h1 {
 
 .panel-header h2 {
     margin-top: 0;
-}
-
-.panel-form #add-website {
-    margin-bottom: 0;
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-}
-
-.panel-form #add-website input,
-.panel-form #add-website button {
-    border-radius: 10px;
 }
 
 .notification-panel {
@@ -937,8 +976,12 @@ button:hover {
         border-radius: 20px;
     }
 
-    .dashboard-card {
-        padding: 1.5rem;
+    .dashboard-hero-side {
+        width: 100%;
+    }
+
+    .hero-panel {
+        padding: 1.25rem;
     }
 
     .panel {
@@ -1164,6 +1207,16 @@ button:hover {
     border-radius: 6px;
     margin-top: 20px;
     border-left: 4px solid var(--success);
+}
+
+.dashboard-hero .pro-tips {
+    background: rgba(15, 23, 42, 0.35);
+    border-left-color: rgba(76, 175, 80, 0.7);
+}
+
+.dashboard-hero .pro-tips h3,
+.dashboard-hero .pro-tips li {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .pro-tips h3 {
