@@ -13,15 +13,20 @@
 <body class="{% block body_class %}{% endblock %}">
     <div class="container">
         {% block header %}
-        <header>
-            <h1>Website Change Monitor</h1>
-            <nav>
+        <header class="app-header">
+            <div class="brand">
+                <a href="{{ url_for('index') }}" class="brand-mark">Website Change Monitor</a>
+                <span class="brand-tagline">Track critical updates in real time.</span>
+            </div>
+            <nav class="app-nav">
                 {% if current_user.is_authenticated %}
-                    <span>Welcome, {{ current_user.username }}!</span>
-                    <a href="{{ url_for('logout') }}">Logout</a>
+                    <a href="{{ url_for('index') }}">Dashboard</a>
+                    <a class="nav-link" href="{{ url_for('index') }}#notification-settings">Notifications</a>
+                    <a class="nav-cta" href="{{ url_for('logout') }}">Logout</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}">Login</a>
-                    <a href="{{ url_for('register') }}">Register</a>
+                    <a href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-cta" href="{{ url_for('register') }}">Start free</a>
                 {% endif %}
             </nav>
         </header>
@@ -47,10 +52,40 @@
             {% endif %}
         {% endwith %}
         
-        <main>
+        <main class="app-main">
             {% block content %}{% endblock %}
         </main>
-        {% block footer %}{% endblock %}
+        {% block footer %}
+        <footer class="app-footer">
+            <div class="footer-grid">
+                <div>
+                    <h4>Website Change Monitor</h4>
+                    <p>Stay informed with instant website change detection.</p>
+                </div>
+                <div>
+                    <h5>Product</h5>
+                    <a href="{{ url_for('index') }}">Dashboard</a>
+                    <a href="{{ url_for('index') }}#add-website">Add websites</a>
+                </div>
+                <div>
+                    <h5>Account</h5>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('logout') }}">Log out</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}">Sign in</a>
+                        <a href="{{ url_for('register') }}">Create account</a>
+                    {% endif %}
+                </div>
+                <div>
+                    <h5>Support</h5>
+                    <span>Built for fast-moving teams.</span>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© Website Change Monitor. All rights reserved.</span>
+            </div>
+        </footer>
+        {% endblock %}
     </div>
 </body>
 </html>
