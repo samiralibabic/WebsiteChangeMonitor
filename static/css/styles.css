@@ -204,9 +204,13 @@ h1 {
 
 .dashboard-hero-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
     gap: 1.5rem;
     align-items: start;
+}
+
+.dashboard-hero-grid #instructions {
+    grid-column: 1 / -1;
 }
 
 .hero-panel {
@@ -938,6 +942,10 @@ button:hover {
     .dashboard-hero {
         padding: 1.75rem;
         border-radius: 20px;
+    }
+
+    .dashboard-hero-grid {
+        grid-template-columns: 1fr;
     }
 
     .dashboard-card {
