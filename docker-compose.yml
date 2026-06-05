@@ -7,6 +7,7 @@ services:
       - SECRET_KEY
       - DATABASE_URL
       - STRIPE_SECRET_KEY
+      - LOG_LEVEL
     ports:
       - "5002:5002"
     volumes:

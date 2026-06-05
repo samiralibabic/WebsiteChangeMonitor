@@ -39,6 +39,7 @@ Website Change Monitor is a web application that allows users to track changes o
    ```
    SECRET_KEY=your_secret_key
    DATABASE_URL=sqlite:///instance/site.db
+   LOG_LEVEL=INFO
    
    # Email configuration (optional)
    MAIL_SERVER=smtp.gmail.com
@@ -64,6 +65,7 @@ The application runs in a Docker container with the following configuration:
 - Gunicorn as the WSGI server
 - SQLite database persisted in a volume
 - Automatic database migrations on startup
+- `LOG_LEVEL` controls Python logging verbosity and defaults to `INFO`
 
 ### Docker Commands
 
